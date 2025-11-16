@@ -94,12 +94,8 @@ def select_wing_words(candidates, mode):
         return []
 
     if mode == "SHOW_ALL":
-        # If only one candidate, no brackets needed
-        if len(candidates) == 1:
-            return candidates
-        else:
-            # Show all candidates in brackets with pipe separators
-            return f"[{' | '.join(candidates)}]"
+        # Show all candidates in brackets with pipe separators
+        return f"[{' | '.join(candidates)}]"
 
     elif mode == "MAX":
         # Include all words
