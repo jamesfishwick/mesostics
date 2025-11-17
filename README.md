@@ -10,12 +10,47 @@ This implementation generates mesostics from Ezra Pound's *Canto I* using the sp
 
 ## Cage's Rules
 
-Based on Cage's description in *X: Writings '79'82* (Wesleyan University Press, 1982):
+### Primary Source
 
-1. **Between-letter prohibition**: Between two spine letters (e.g., E and Z), neither letter may appear
-2. **Syllable index**: Track syllables containing each letter; don't repeat syllables for the same letter
-3. **First occurrence**: Use the first word encountered that contains the target letter
-4. **45-character limit**: Maximum 45 characters of "wing words" on each side of a spine word
+From Cage's *X: Writings '79-'82* (Wesleyan University Press, 1982), page 109:
+
+> "To write the following text I followed the rule given me by Louis Mink, which I also followed in Writing for the Third (and Fourth) Time through Finnegans Wake, that is, I did not permit the appearance of either letter between two of the name. As in Writing for the Fourth Time Through Finnegans Wake, I kept an index of the syllables used to present a given letter of the name and I did not permit repetition of these syllables."
+
+### Rule Interpretation
+
+Through analysis of Cage's output compared to source text, we've identified these working rules:
+
+1. **Sequential letter selection**: Move through source text linearly, spelling out the spine word (EZRAPOUND) with capitalized letters
+
+2. **Between-letter prohibition**: Between spine letter N and spine letter N+1, no words may contain either of those two letters
+   - Example: Between E (from "thEn") and Z (from "bronZe"), skip all words containing E or Z
+   - This applies to potential spine words AND wing words
+
+3. **Syllable indexing**: When a word is used to "present" a letter from the spine:
+   - Extract the syllable containing that letter
+   - Index that syllable to that letter
+   - Cannot reuse that syllable for the same letter later
+   - Example: "thEn" indexes syllable "then" to E; can't use "then" again for E
+
+4. **Words containing spine letters**: Any word containing a letter from the spine word "presents" that letter
+   - Words with spine letters must be used in proper sequence (or skipped)
+   - Cannot use a word that would present a letter out of order
+   - Example: Skip "down" (contains D) while seeking Z, because using it would burn the syllable "down" for D
+
+5. **Neutral words**: Words containing NO letters from the spine word can appear as wing words without constraint
+
+6. **Source capitalization** (hypothesis): Cannot use words already capitalized in source text
+   - Mesostic marking requires adding capitalization
+   - If word is already capitalized, the marking isn't distinctive
+   - Example: "Pallor" (capitalized in Pound) → skip; "sheep" (lowercase) → use as "sheeP"
+
+### Additional Documentation
+
+**Wing word concept** documented in:
+- [Virginia Silence mailing list discussion](https://lists.virginia.edu/sympa/arc/silence/2019-01/msg00024/mesostic_demo.pdf)
+- [Platonic Music Engine implementation](https://www.platonicmusicengine.com/mesostic.html)
+
+These sources specify the **45-character limit**: Maximum 45 characters of wing words on either side of each spine word.
 
 ## Installation
 
@@ -83,9 +118,52 @@ The script generates mesostic lines:
 - Tracks syllable usage to prevent repetition
 - Enforces 45-character wing limits per Cage's method
 
+## Current Implementation Status
+
+### Known Divergence from Cage's Output
+
+Our implementation currently produces output that diverges from Cage's published mesostic at the second line:
+
+**Cage's output:**
+```
+and thEn with bronZe lance heads beaRing yet Arms
+sheeP slain Of plUto stroNg praiseD
+```
+
+**Our output:**
+```
+[And] thEn [with] bronZe [lance | heads, | Battle | spoil,] beaRing [yet] Arms, [These]
+[me; | with | shouting,] Pallor upOn [me, | cried] [beasts;] SlaUghtered [the | herds, | sheep] slaiN [of] PoureD
+```
+
+### The Pallor vs. sheeP Problem
+
+The first line matches perfectly, but at the second line (spelling POUND), our implementation selects "Pallor" for P while Cage uses "sheeP".
+
+**Analysis:**
+- Both words occur in Pound's source text after "Arms" (the previous spine word)
+- "Pallor" appears first: "Pallor upon me, cried to my men for more beasts; / Slaughtered the herds, sheep slain of bronze"
+- Source capitalization doesn't explain it: "upon" (lowercase) comes between them and also contains P
+
+**Letter composition:**
+- "Pallor" = P-a-l-l-**o**-r (contains **o**, a future letter in POUND)
+- "upon" = **u**-p-**o**-**n** (contains **u**, **o**, **n** all future letters)
+- "sheeP" = s-h-e-e-p (contains only **p** target + **e** previous, no future letters)
+
+**Revised Hypothesis:**
+A spine word can contain:
+- The target letter (required)
+- Previous spine letters already used (allowed, as in "bronZe" containing e)
+- But NO future spine letters (would burn syllables prematurely)
+
+This explains why Cage skips both "Pallor" (has future O) and "upon" (has future O, U, N) to reach "sheeP" (clean, only target + previous).
+
+**Next Step:**
+Implement filter to reject spine words containing any letters from EZRAPOUND that haven't been presented yet in sequence.
+
 ## References
 
-- Cage, John. *X: Writings '79'82*. Middletown, Conn.: Wesleyan University Press, 1982.
+- Cage, John. *X: Writings '79'82*. Middletown, Conn.: Wesleyan University Press, 1982.
 - Pound, Ezra. *The Cantos*. Various editions.
 
 ## License
