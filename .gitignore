@@ -8,3 +8,14 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Claude Code session files
+.claude/
+
+# Corpus build artifacts
+corpus/node_modules/
+corpus/yarn.lock
+corpus/output_ocr.pdf
+
+# Backup files
+*.bak
