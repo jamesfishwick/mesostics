@@ -169,7 +169,7 @@ Tokens are normalized before indexing, so `bronZe` and `bronZe,` present the sam
 just test
 ```
 
-The `test` and `lint` recipes are named for the global git hooks, which look for those two names and run them before a commit or push.
+`test_syllables.py` covers the splitting and the index, `test_mesostics.py` the generator's state machine. The `test` and `lint` recipes are named for the global git hooks, which look for those two names and run them before a commit or push.
 
 ## Current Implementation Status
 
@@ -189,6 +189,13 @@ sheeP slain Of plUto stroNg praiseD
 ```
 [And] thEn [with] bronZe [lance | heads, | Battle | spoil,] beaRing [yet] Arms, [These]
 [me; | with | shouting,] Pallor upOn [me, | cried] [beasts;] SlaUghtered [the | herds, | sheep] slaiN [of] PoureD
+ointmEnt,
+```
+
+The third line is where the text runs out. Every Z-bearing word in Canto I is `bronze`, and the no-repeat rule has already spent that syllable, so Z can never be presented a second time. The script says as much on stderr:
+
+```
+spine incomplete: 'Z' of 'EZRAPOUND' was never presented because the source text ran out
 ```
 
 ### The Pallor vs. sheeP Problem
