@@ -1,4 +1,6 @@
 import os
+import sys
+import warnings
 
 from syllables import extract_syllable_with_letter
 
@@ -119,6 +121,7 @@ def select_wing_words(candidates, mode):
 def generate_mesostic():
     """Walk the source text once, spelling the spine word down the page."""
     syllable_index = {}  # {letter: [used_syllables]}
+    blocked = {}  # {letter: [syllables rejected because already indexed]}
     result_lines = []  # Each element is a complete line
     current_letter_idx = 0
     previous_letter = None  # Track the spine letter we just used
@@ -223,7 +226,10 @@ def generate_mesostic():
                     # Mark that line will be complete after collecting right wing
                     line_complete = True
             else:
-                continue  # syllable already used
+                # The word presents the letter but its syllable is spent. Keep
+                # it so the end of the walk can say what blocked the spine.
+                blocked.setdefault(current_letter, []).append(syllable)
+                continue
 
         # STATE 3: Build word history for consecutive left wing extraction
         elif not collecting_right_wing:
@@ -242,9 +248,44 @@ def generate_mesostic():
     # dropping it loses every letter already presented on it.
     if current_line_segments:
         result_lines.append(' '.join(current_line_segments).strip())
+
+    _warn_if_spine_incomplete(current_letter_idx, blocked)
     return result_lines
 
 
+def _warn_if_spine_incomplete(current_letter_idx, blocked):
+    """Say which letter the walk stopped on, and why, instead of stopping quietly.
+
+    Cage's no-repeat rule can exhaust a letter outright: every Z in Canto I is
+    "bronze", so a second pass over the text can never present Z again. Without
+    this the generator reads to the end of the source and returns a short poem
+    with no indication that anything went wrong.
+    """
+    position = current_letter_idx % len(target_name)
+    if not position:
+        return
+
+    letter = target_name[position]
+    spent = blocked.get(letter)
+    if spent:
+        reused = ", ".join(sorted(set(spent)))
+        reason = f"every remaining word presenting it reuses an indexed syllable ({reused})"
+    else:
+        reason = "the source text ran out"
+    warnings.warn(
+        f"spine incomplete: {letter!r} of {target_name!r} was never presented "
+        f"because {reason}",
+        stacklevel=3,
+    )
+
+
 if __name__ == "__main__":
-    for line in generate_mesostic():
+    # Hold the warning until the poem is printed, and show it without the
+    # file-and-line preamble the default formatter adds.
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        mesostic_lines = generate_mesostic()
+    for line in mesostic_lines:
         print(line)
+    for warning in caught:
+        print(warning.message, file=sys.stderr)
