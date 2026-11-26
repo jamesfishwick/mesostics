@@ -19,3 +19,6 @@ corpus/output_ocr.pdf
 
 # Backup files
 *.bak
+
+# Test artifacts
+.pytest_cache/
