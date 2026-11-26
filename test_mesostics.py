@@ -4,6 +4,7 @@ The generator reads module-level configuration, so every test that changes the
 source text or a setting restores it afterwards.
 """
 
+import re
 import warnings
 
 import pytest
@@ -73,3 +74,36 @@ class TestIncompleteSpine:
         with warnings.catch_warnings():
             warnings.simplefilter("error")
             mesostics.generate_mesostic()
+
+
+class TestWingContiguity:
+    """A wing is described as consecutive, so a skipped word must break it."""
+
+    @staticmethod
+    def corpus():
+        with open(mesostics.CORPUS_PATH, encoding="utf-8") as text:
+            return text.read().split()
+
+    def test_a_skipped_word_breaks_the_chain(self, source):
+        # Canto I leaves the spine stuck on Z. Offer a spent Z word, a neutral
+        # word, then a fresh one: the wing may reach the neutral word and stop.
+        source(self.corpus() + ["bronze", "crawl", "zoo"])
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            last = mesostics.generate_mesostic()[-1]
+        assert "crawl] Zoo" in last
+        assert "bough" not in last, "wing reached back past the skipped word"
+
+    def test_every_wing_is_a_contiguous_run_of_the_source(self, source):
+        words = self.corpus()
+        source(words)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            lines = mesostics.generate_mesostic()
+
+        for line in lines:
+            for wing in re.findall(r"\[([^\]]*)\]", line):
+                run = wing.split(" | ")
+                assert any(words[i:i + len(run)] == run
+                           for i in range(len(words) - len(run) + 1)), (
+                    f"wing {run} is not contiguous in the source")

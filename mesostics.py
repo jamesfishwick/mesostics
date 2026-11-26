@@ -229,6 +229,12 @@ def generate_mesostic():
                 # The word presents the letter but its syllable is spent. Keep
                 # it so the end of the walk can say what blocked the spine.
                 blocked.setdefault(current_letter, []).append(syllable)
+                # It still stood here in the source, so the left wing has to
+                # break at it the way it would for any other word carrying a
+                # prohibited letter. Dropping it outright let the chain span a
+                # gap and call words consecutive that never were.
+                if not collecting_right_wing:
+                    left_wing_history.append((word, letters_in_word))
                 continue
 
         # STATE 3: Build word history for consecutive left wing extraction
