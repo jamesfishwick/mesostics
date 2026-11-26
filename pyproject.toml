@@ -5,5 +5,11 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
+    "cmudict>=1.0.0",
     "pyphen>=0.17.2",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=7.0",
 ]

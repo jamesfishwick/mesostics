@@ -1,9 +1,6 @@
 import os
 
-import pyphen
-
-# Create pyphen dictionary for English (module level, reused)
-pyphen_dic = pyphen.Pyphen(lang='en')
+from syllables import extract_syllable_with_letter
 
 CORPUS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                            "corpus", "canto_i.txt")
@@ -18,24 +15,6 @@ def capitalize_letter(word, letter):
         if char == letter_upper:
             return word[:i] + word[i].upper() + word[i+1:]
     return word
-
-
-def extract_syllable_with_letter(word, letter):
-    """Extract the syllable containing the specified letter from the word."""
-    # Use pyphen to split word into syllables
-    hyphenated = pyphen_dic.inserted(word)
-
-    # Split on hyphens to get individual syllables
-    syllables = hyphenated.split('-')
-
-    # Find which syllable contains the target letter
-    letter_lower = letter.lower()
-    for syllable in syllables:
-        if letter_lower in syllable.lower():
-            return syllable.lower()
-
-    # Fallback: return whole word if letter not found in any syllable
-    return word.lower()
 
 
 # Read the source text from the file
