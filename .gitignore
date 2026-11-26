@@ -22,3 +22,4 @@ corpus/output_ocr.pdf
 
 # Test artifacts
 .pytest_cache/
+.coverage

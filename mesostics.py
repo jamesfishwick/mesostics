@@ -129,8 +129,9 @@ def select_wing_words(candidates, mode):
             return [candidates[0]] if candidates else []
 
     elif mode == "INTERACTIVE":
-        # Placeholder - for now, return MAX behavior
-        print(f"Available wing words: {candidates}")
+        # Placeholder - for now, return MAX behavior. The prompt goes to
+        # stderr because stdout carries the poem.
+        print(f"Available wing words: {candidates}", file=sys.stderr)
         # TODO: Implement user selection
         return candidates
 

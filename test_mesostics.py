@@ -145,3 +145,91 @@ class TestMesosticRule:
     def test_prohibited_letters(self, monkeypatch, other, current, rule, expected):
         monkeypatch.setattr(mesostics, "MESOSTIC_RULE", rule)
         assert mesostics.prohibited_letters(other, current) == expected
+
+
+CANDIDATES = ["the", "bronze", "lance", "of", "heads"]
+
+
+class TestWingModes:
+    """select_wing_words had no coverage at all beyond SHOW_ALL."""
+
+    def test_empty_candidates_give_an_empty_wing(self):
+        for mode in ("SHOW_ALL", "MAX", "RANDOM", "MINIMAL", "INTERACTIVE"):
+            assert mesostics.select_wing_words([], mode) == []
+
+    def test_show_all_brackets_every_candidate(self):
+        assert (mesostics.select_wing_words(CANDIDATES, "SHOW_ALL")
+                == "[the | bronze | lance | of | heads]")
+
+    def test_max_keeps_every_candidate_in_order(self):
+        assert mesostics.select_wing_words(CANDIDATES, "MAX") == CANDIDATES
+
+    def test_an_unknown_mode_behaves_like_max(self):
+        assert (mesostics.select_wing_words(CANDIDATES, "NONSENSE")
+                == CANDIDATES)
+
+    def test_minimal_takes_the_two_longest_content_words(self):
+        # "the" and "of" are stopwords and must not survive the cut. "lance"
+        # and "heads" tie at five characters, and the sort is stable, so the
+        # earlier one wins.
+        assert (mesostics.select_wing_words(CANDIDATES, "MINIMAL")
+                == ["bronze", "lance"])
+
+    def test_minimal_falls_back_when_every_word_is_a_stopword(self):
+        assert mesostics.select_wing_words(["the", "of"], "MINIMAL") == ["the"]
+
+    @pytest.mark.parametrize("seed", range(10))
+    def test_random_stays_within_the_configured_count(self, seed, monkeypatch):
+        import random
+        random.seed(seed)
+        chosen = mesostics.select_wing_words(CANDIDATES, "RANDOM")
+        low, high = mesostics.RANDOM_WORD_COUNT
+        assert low <= len(chosen) <= high
+        assert set(chosen) <= set(CANDIDATES)
+        assert len(set(chosen)) == len(chosen), "a word was offered twice"
+
+    def test_interactive_is_still_a_stub_that_behaves_like_max(self):
+        assert (mesostics.select_wing_words(CANDIDATES, "INTERACTIVE")
+                == CANDIDATES)
+
+    def test_interactive_does_not_write_into_the_poem(self, capsys):
+        mesostics.select_wing_words(CANDIDATES, "INTERACTIVE")
+        captured = capsys.readouterr()
+        assert captured.out == "", "stdout carries the poem and must stay clean"
+        assert "bronze" in captured.err
+
+    @pytest.mark.parametrize("mode", ["MAX", "MINIMAL", "RANDOM"])
+    def test_every_mode_produces_a_poem(self, mode, monkeypatch):
+        monkeypatch.setattr(mesostics, "WING_MODE", mode)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            lines = mesostics.generate_mesostic()
+        assert lines and all(line.strip() for line in lines)
+
+
+class TestCapitalizeLetter:
+    def test_marks_the_first_occurrence(self):
+        assert mesostics.capitalize_letter("bronze", "z") == "bronZe"
+
+    def test_is_case_insensitive(self):
+        assert mesostics.capitalize_letter("bronze", "Z") == "bronZe"
+
+    def test_a_word_without_the_letter_is_returned_unchanged(self):
+        assert mesostics.capitalize_letter("sheep", "z") == "sheep"
+
+
+class TestTrailingRightWing:
+    def test_text_ending_mid_wing_keeps_the_wing(self, source, monkeypatch):
+        monkeypatch.setattr(mesostics, "WING_MODE", "MAX")
+        source(["then", "with"])
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            lines = mesostics.generate_mesostic()
+        assert lines == ["thEn with"]
+
+    def test_show_all_brackets_a_trailing_wing(self, source):
+        source(["then", "with"])
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            lines = mesostics.generate_mesostic()
+        assert lines == ["thEn [with]"]
