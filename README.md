@@ -66,11 +66,17 @@ pip install pyphen cmudict
 ## Usage
 
 ```bash
-# Run with default settings
-uv run python mesostics.py
+just run                   # generate the mesostic
+just test                  # run the test suite
+just lint                  # ruff
+just                       # list every recipe
+```
 
-# Or with regular python
-python mesostics.py
+Or without `just`:
+
+```bash
+uv run python mesostics.py
+uv run pytest
 ```
 
 ## Configuration
@@ -148,8 +154,10 @@ Tokens are normalized before indexing, so `bronZe` and `bronZe,` present the sam
 ## Tests
 
 ```bash
-uv run pytest
+just test
 ```
+
+The `test` and `lint` recipes are named for the global git hooks, which look for those two names and run them before a commit or push.
 
 ## Current Implementation Status
 
