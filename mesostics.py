@@ -1,4 +1,5 @@
 import os
+import random
 import sys
 import warnings
 
@@ -110,7 +111,6 @@ def select_wing_words(candidates, mode):
 
     elif mode == "RANDOM":
         # Random selection
-        import random
         min_count, max_count = RANDOM_WORD_COUNT
         count = random.randint(min_count, min(max_count, len(candidates)))
         return random.sample(candidates, count)
@@ -153,7 +153,7 @@ def generate_mesostic():
     right_wing_chars = 0  # Running character count of right wing candidates
     line_complete = False  # Track when we've completed a name segment (EZRA or POUND)
 
-    for word_idx, word in enumerate(source_text):
+    for word in source_text:
         letters_in_word = set(word.upper())
 
         # Get current position in the cycle (0-8, then reset)

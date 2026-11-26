@@ -18,14 +18,27 @@ character. The residue is initialisms such as "abc", three syllables aloud with
 no orthographic boundary to find.
 """
 
+import functools
 import re
 import unicodedata
 
 import cmudict
 import pyphen
 
-_CMU = cmudict.dict()
 _pyphen_dic = pyphen.Pyphen(lang="en")
+_cmu_entries = None
+
+
+def _cmu():
+    """The CMU dictionary, built on first use.
+
+    Building it costs a quarter of a second and some eight megabytes, which is
+    too much to charge an importer that only wants normalize().
+    """
+    global _cmu_entries
+    if _cmu_entries is None:
+        _cmu_entries = cmudict.dict()
+    return _cmu_entries
 
 # Sonority ranks, quietest to loudest. A syllable nucleus is a local peak, so a
 # boundary belongs at each trough between two peaks.
@@ -58,7 +71,7 @@ def cmu_syllable_count(word):
     counts nuclei. Words with several pronunciations take the smallest count,
     which is the one a reader is most likely to hear.
     """
-    pronunciations = _CMU.get(normalize(word))
+    pronunciations = _cmu().get(normalize(word))
     if not pronunciations:
         return None
     return min(
@@ -201,7 +214,16 @@ def syllabify(word):
     normalized = normalize(word)
     if not normalized:
         return [word.lower()] if word else []
+    return list(_syllabify_normalized(normalized))
 
+
+@functools.lru_cache(maxsize=8192)
+def _syllabify_normalized(normalized):
+    """The split itself, memoized.
+
+    A third of the tokens in a source text are repeats. The tuple keeps the
+    cached value immutable so a caller mutating its list cannot poison it.
+    """
     candidates = (
         _pyphen_split(normalized),
         _corrected_ssp_split(normalized),
@@ -210,21 +232,21 @@ def syllabify(word):
 
     target = cmu_syllable_count(normalized)
     if target is None:
-        return candidates[1]
+        return tuple(candidates[1])
     # "hmm" and "shh" are all consonant, so CMU counts no nuclei. Every word
     # still has to yield at least one piece for the index to hold.
     target = max(1, target)
 
     for candidate in candidates:
         if len(candidate) == target:
-            return candidate
+            return tuple(candidate)
 
     # No candidate hits the count. Take the one with the most pieces and close
     # the gap from whichever side it falls on.
     richest = max(candidates, key=len)
     if len(richest) > target:
-        return _merge_to_count(richest, target)
-    return _split_vowel_runs(richest, target)
+        return tuple(_merge_to_count(richest, target))
+    return tuple(_split_vowel_runs(richest, target))
 
 
 def syllable_count(word):

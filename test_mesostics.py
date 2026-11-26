@@ -4,6 +4,7 @@ The generator reads module-level configuration, so every test that changes the
 source text or a setting restores it afterwards.
 """
 
+import random
 import re
 import warnings
 
@@ -56,7 +57,7 @@ class TestIncompleteSpine:
         with pytest.warns(UserWarning, match="source text ran out"):
             mesostics.generate_mesostic()
 
-    def test_exhausted_syllables_are_named(self, source, monkeypatch):
+    def test_exhausted_syllables_are_named(self, source):
         # Every Z-bearing word in Canto I is "bronze". Read the text twice and
         # the second pass can never present Z again.
         with open(mesostics.CORPUS_PATH, encoding="utf-8") as corpus:
@@ -179,8 +180,7 @@ class TestWingModes:
         assert mesostics.select_wing_words(["the", "of"], "MINIMAL") == ["the"]
 
     @pytest.mark.parametrize("seed", range(10))
-    def test_random_stays_within_the_configured_count(self, seed, monkeypatch):
-        import random
+    def test_random_stays_within_the_configured_count(self, seed):
         random.seed(seed)
         chosen = mesostics.select_wing_words(CANDIDATES, "RANDOM")
         low, high = mesostics.RANDOM_WORD_COUNT
