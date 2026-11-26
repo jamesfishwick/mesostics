@@ -1,7 +1,13 @@
+import os
+
 import pyphen
 
 # Create pyphen dictionary for English (module level, reused)
 pyphen_dic = pyphen.Pyphen(lang='en')
+
+CORPUS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                           "corpus", "canto_i.txt")
+
 
 def capitalize_letter(word, letter):
     """Capitalize the first occurrence of the specified letter in the word."""
@@ -12,6 +18,7 @@ def capitalize_letter(word, letter):
         if char == letter_upper:
             return word[:i] + word[i].upper() + word[i+1:]
     return word
+
 
 def extract_syllable_with_letter(word, letter):
     """Extract the syllable containing the specified letter from the word."""
@@ -30,14 +37,13 @@ def extract_syllable_with_letter(word, letter):
     # Fallback: return whole word if letter not found in any syllable
     return word.lower()
 
+
 # Read the source text from the file
-with open("corpus/canto_i.txt", "r", encoding="utf-8") as file:
-	canto_1 = file.read()
+with open(CORPUS_PATH, "r", encoding="utf-8") as file:
+    canto_1 = file.read()
 
 source_text = canto_1.split()
 target_name = "EZRAPOUND"
-syllable_index = {}  # {letter: [used_syllables]}
-result_lines = []  # Each element is a complete line
 
 # Configuration
 WING_CHAR_LIMIT = 45  # Maximum characters on each side of spine word
@@ -131,125 +137,131 @@ def select_wing_words(candidates, mode):
         # Default to MAX
         return candidates
 
-current_letter_idx = 0
-previous_letter = None  # Track the spine letter we just used
-left_wing_history = []  # History of (word, letters_in_word) tuples for consecutive chain extraction
-current_line_segments = []  # Accumulate segments for current line (EZRA or POUND)
-collecting_right_wing = False  # Are we collecting words after a spine word?
-right_wing_candidates = []  # Consecutive valid words for right wing
-right_wing_chars = 0  # Running character count of right wing candidates
-line_complete = False  # Track when we've completed a name segment (EZRA or POUND)
+def generate_mesostic():
+    """Walk the source text once, spelling the spine word down the page."""
+    syllable_index = {}  # {letter: [used_syllables]}
+    result_lines = []  # Each element is a complete line
+    current_letter_idx = 0
+    previous_letter = None  # Track the spine letter we just used
+    left_wing_history = []  # History of (word, letters_in_word) tuples for consecutive chain extraction
+    current_line_segments = []  # Accumulate segments for current line (EZRA or POUND)
+    collecting_right_wing = False  # Are we collecting words after a spine word?
+    right_wing_candidates = []  # Consecutive valid words for right wing
+    right_wing_chars = 0  # Running character count of right wing candidates
+    line_complete = False  # Track when we've completed a name segment (EZRA or POUND)
 
-for word_idx, word in enumerate(source_text):
-    letters_in_word = set(word.upper())
+    for word_idx, word in enumerate(source_text):
+        letters_in_word = set(word.upper())
 
-    # Get current position in the cycle (0-8, then reset)
-    position_in_name = current_letter_idx % len(target_name)
-    current_letter = target_name[position_in_name]
+        # Get current position in the cycle (0-8, then reset)
+        position_in_name = current_letter_idx % len(target_name)
+        current_letter = target_name[position_in_name]
 
-    # STATE 1: Currently collecting right wing after a spine word
-    if collecting_right_wing:
-        # Check if this word can be added to right wing
-        if previous_letter not in letters_in_word and current_letter not in letters_in_word:
-            word_len = len(word) + 1  # +1 for space
-            if right_wing_chars + word_len <= WING_CHAR_LIMIT:
-                right_wing_candidates.append(word)
-                right_wing_chars += word_len
-                continue  # Continue collecting right wing
-        # Either hit a forbidden word or reached char limit - finish right wing
-        # Apply wing mode selection
-        selected_right = select_wing_words(right_wing_candidates, WING_MODE)
+        # STATE 1: Currently collecting right wing after a spine word
+        if collecting_right_wing:
+            # Check if this word can be added to right wing
+            if previous_letter not in letters_in_word and current_letter not in letters_in_word:
+                word_len = len(word) + 1  # +1 for space
+                if right_wing_chars + word_len <= WING_CHAR_LIMIT:
+                    right_wing_candidates.append(word)
+                    right_wing_chars += word_len
+                    continue  # Continue collecting right wing
+            # Either hit a forbidden word or reached char limit - finish right wing
+            # Apply wing mode selection
+            selected_right = select_wing_words(right_wing_candidates, WING_MODE)
 
-        # Add selected right wing to line segments
-        if isinstance(selected_right, str):  # SHOW_ALL returns a string
-            current_line_segments.append(selected_right)
-        else:
-            current_line_segments.extend(selected_right)
-
-        # Check if this completes the line
-        if line_complete:
-            # Output the complete line
-            result_lines.append(' '.join(current_line_segments))
-            # Reset everything for new line
-            current_line_segments = []
-            # DON'T reset previous_letter - we need it for between-letter prohibition
-            line_complete = False
-
-        # Reset for next spine word
-        left_wing_history = []
-        right_wing_candidates = []
-        right_wing_chars = 0
-        collecting_right_wing = False
-
-        # Fall through to process current word normally
-
-    # STATE 2: Word contains current target letter - this is a spine word
-    if current_letter in word.upper():
-        syllable = extract_syllable_with_letter(word, current_letter)
-        if syllable not in syllable_index.get(current_letter, []):
-            # Found spine word!
-            spine_word = capitalize_letter(word, current_letter)
-
-            # Determine which letters to exclude for left wing
-            if previous_letter is None:
-                # Before first spine letter, exclude current and next
-                next_position = (position_in_name + 1) % len(target_name)
-                next_letter = target_name[next_position]
-                exclude_letters = {current_letter, next_letter}
+            # Add selected right wing to line segments
+            if isinstance(selected_right, str):  # SHOW_ALL returns a string
+                current_line_segments.append(selected_right)
             else:
-                # Between spine letters, exclude previous and current
-                exclude_letters = {previous_letter, current_letter}
+                current_line_segments.extend(selected_right)
 
-            # Extract consecutive left wing chain working backward from current position
-            left_wing_consecutive = extract_consecutive_left_wing(
-                left_wing_history,
-                exclude_letters,
-                WING_CHAR_LIMIT
-            )
+            # Check if this completes the line
+            if line_complete:
+                # Output the complete line
+                result_lines.append(' '.join(current_line_segments))
+                # Reset everything for new line
+                current_line_segments = []
+                # DON'T reset previous_letter - we need it for between-letter prohibition
+                line_complete = False
 
-            # Apply wing mode selection to consecutive left wing
-            selected_left = select_wing_words(left_wing_consecutive, WING_MODE)
-
-            # Add left wing + spine word to segments
-            if isinstance(selected_left, str):  # SHOW_ALL returns a string
-                current_line_segments.append(selected_left)
-                current_line_segments.append(spine_word)
-            else:
-                current_line_segments.extend(selected_left)
-                current_line_segments.append(spine_word)
-
-            syllable_index.setdefault(current_letter, []).append(syllable)
-            previous_letter = current_letter
-            current_letter_idx += 1
-
-            # Start collecting right wing
-            collecting_right_wing = True
+            # Reset for next spine word
             left_wing_history = []
             right_wing_candidates = []
             right_wing_chars = 0
+            collecting_right_wing = False
 
-            # Check if we completed a name segment (EZRA or POUND)
-            new_position = current_letter_idx % len(target_name)
-            if new_position == 4 or new_position == 0:
-                # Mark that line will be complete after collecting right wing
-                line_complete = True
+            # Fall through to process current word normally
+
+        # STATE 2: Word contains current target letter - this is a spine word
+        if current_letter in word.upper():
+            syllable = extract_syllable_with_letter(word, current_letter)
+            if syllable not in syllable_index.get(current_letter, []):
+                # Found spine word!
+                spine_word = capitalize_letter(word, current_letter)
+
+                # Determine which letters to exclude for left wing
+                if previous_letter is None:
+                    # Before first spine letter, exclude current and next
+                    next_position = (position_in_name + 1) % len(target_name)
+                    next_letter = target_name[next_position]
+                    exclude_letters = {current_letter, next_letter}
+                else:
+                    # Between spine letters, exclude previous and current
+                    exclude_letters = {previous_letter, current_letter}
+
+                # Extract consecutive left wing chain working backward from current position
+                left_wing_consecutive = extract_consecutive_left_wing(
+                    left_wing_history,
+                    exclude_letters,
+                    WING_CHAR_LIMIT
+                )
+
+                # Apply wing mode selection to consecutive left wing
+                selected_left = select_wing_words(left_wing_consecutive, WING_MODE)
+
+                # Add left wing + spine word to segments
+                if isinstance(selected_left, str):  # SHOW_ALL returns a string
+                    current_line_segments.append(selected_left)
+                    current_line_segments.append(spine_word)
+                else:
+                    current_line_segments.extend(selected_left)
+                    current_line_segments.append(spine_word)
+
+                syllable_index.setdefault(current_letter, []).append(syllable)
+                previous_letter = current_letter
+                current_letter_idx += 1
+
+                # Start collecting right wing
+                collecting_right_wing = True
+                left_wing_history = []
+                right_wing_candidates = []
+                right_wing_chars = 0
+
+                # Check if we completed a name segment (EZRA or POUND)
+                new_position = current_letter_idx % len(target_name)
+                if new_position == 4 or new_position == 0:
+                    # Mark that line will be complete after collecting right wing
+                    line_complete = True
+            else:
+                continue  # syllable already used
+
+        # STATE 3: Build word history for consecutive left wing extraction
+        elif not collecting_right_wing:
+            # Store word in history (will be filtered for consecutive chain when spine word is found)
+            left_wing_history.append((word, letters_in_word))
+
+    # Handle any remaining segments at end of text
+    if collecting_right_wing:
+        selected_right = select_wing_words(right_wing_candidates, WING_MODE)
+        if isinstance(selected_right, str):
+            current_line_segments.append(selected_right)
         else:
-            continue  # syllable already used
+            current_line_segments.extend(selected_right)
+        result_lines.append(' '.join(current_line_segments))
+    return result_lines
 
-    # STATE 3: Build word history for consecutive left wing extraction
-    elif not collecting_right_wing:
-        # Store word in history (will be filtered for consecutive chain when spine word is found)
-        left_wing_history.append((word, letters_in_word))
 
-# Handle any remaining segments at end of text
-if collecting_right_wing:
-    selected_right = select_wing_words(right_wing_candidates, WING_MODE)
-    if isinstance(selected_right, str):
-        current_line_segments.append(selected_right)
-    else:
-        current_line_segments.extend(selected_right)
-    result_lines.append(' '.join(current_line_segments))
-
-# Print the mesostic to terminal
-for line in result_lines:
-    print(line)
+if __name__ == "__main__":
+    for line in generate_mesostic():
+        print(line)
