@@ -107,3 +107,41 @@ class TestWingContiguity:
                 assert any(words[i:i + len(run)] == run
                            for i in range(len(words) - len(run) + 1)), (
                     f"wing {run} is not contiguous in the source")
+
+
+class TestMesosticRule:
+    """The strictness knob was documented but never read."""
+
+    @staticmethod
+    def run(monkeypatch, rule):
+        monkeypatch.setattr(mesostics, "MESOSTIC_RULE", rule)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            return mesostics.generate_mesostic()
+
+    def test_the_default_is_the_rule_cage_states(self):
+        assert mesostics.MESOSTIC_RULE == "100%"
+
+    def test_relaxing_the_rule_admits_more_wing_material(self, monkeypatch):
+        sizes = [sum(len(line) for line in self.run(monkeypatch, rule))
+                 for rule in ("100%", "50%", "0%")]
+        assert sizes[0] < sizes[1] < sizes[2], sizes
+
+    def test_each_level_gives_a_different_poem(self, monkeypatch):
+        poems = [self.run(monkeypatch, rule) for rule in ("100%", "50%", "0%")]
+        assert poems[0] != poems[1] != poems[2]
+
+    def test_an_unknown_rule_fails_loudly(self, monkeypatch):
+        with pytest.raises(ValueError, match="MESOSTIC_RULE"):
+            self.run(monkeypatch, "110%")
+
+    @pytest.mark.parametrize(
+        "other,current,rule,expected",
+        [("E", "Z", "100%", {"E", "Z"}),
+         ("E", "Z", "50%", {"Z"}),
+         ("E", "Z", "0%", set()),
+         (None, "E", "100%", {"E"})],
+    )
+    def test_prohibited_letters(self, monkeypatch, other, current, rule, expected):
+        monkeypatch.setattr(mesostics, "MESOSTIC_RULE", rule)
+        assert mesostics.prohibited_letters(other, current) == expected

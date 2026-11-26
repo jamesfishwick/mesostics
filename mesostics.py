@@ -28,9 +28,29 @@ target_name = "EZRAPOUND"
 
 # Configuration
 WING_CHAR_LIMIT = 45  # Maximum characters on each side of spine word
-MESOSTIC_RULE = "100%"  # "100%", "50%", or "0%"
+MESOSTIC_RULE = "100%"  # "100%", "50%", or "0%" - see prohibited_letters
 WING_MODE = "SHOW_ALL"  # "SHOW_ALL", "MAX", "RANDOM", "MINIMAL", "INTERACTIVE"
 RANDOM_WORD_COUNT = (1, 3)  # (min, max) words for RANDOM mode
+
+def prohibited_letters(other_letter, current_letter):
+    """Letters a wing word may not contain, at the configured strictness.
+
+    "100%" is the rule Cage quotes in the README: between two letters of the
+    name, neither of them may appear. "50%" keeps only the prohibition on the
+    letter being sought, and "0%" drops both, leaving nothing but the spine
+    itself. The looser settings are this implementation's reading of a knob the
+    source material does not define; 100% is the one Cage states.
+    """
+    if MESOSTIC_RULE == "0%":
+        return set()
+    if MESOSTIC_RULE == "50%":
+        return {current_letter}
+    if MESOSTIC_RULE != "100%":
+        raise ValueError(
+            f"MESOSTIC_RULE must be '100%', '50%' or '0%', not {MESOSTIC_RULE!r}"
+        )
+    return {letter for letter in (other_letter, current_letter) if letter}
+
 
 def extract_consecutive_left_wing(word_history, exclude_letters, char_limit):
     """
@@ -142,7 +162,8 @@ def generate_mesostic():
         # STATE 1: Currently collecting right wing after a spine word
         if collecting_right_wing:
             # Check if this word can be added to right wing
-            if previous_letter not in letters_in_word and current_letter not in letters_in_word:
+            forbidden = prohibited_letters(previous_letter, current_letter)
+            if not letters_in_word & forbidden:
                 word_len = len(word) + 1  # +1 for space
                 if right_wing_chars + word_len <= WING_CHAR_LIMIT:
                     right_wing_candidates.append(word)
@@ -182,15 +203,14 @@ def generate_mesostic():
                 # Found spine word!
                 spine_word = capitalize_letter(word, current_letter)
 
-                # Determine which letters to exclude for left wing
+                # Before the first spine letter there is no previous letter,
+                # so the next one stands in its place.
                 if previous_letter is None:
-                    # Before first spine letter, exclude current and next
                     next_position = (position_in_name + 1) % len(target_name)
-                    next_letter = target_name[next_position]
-                    exclude_letters = {current_letter, next_letter}
+                    other_letter = target_name[next_position]
                 else:
-                    # Between spine letters, exclude previous and current
-                    exclude_letters = {previous_letter, current_letter}
+                    other_letter = previous_letter
+                exclude_letters = prohibited_letters(other_letter, current_letter)
 
                 # Extract consecutive left wing chain working backward from current position
                 left_wing_consecutive = extract_consecutive_left_wing(

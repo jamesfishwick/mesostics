@@ -89,6 +89,18 @@ MESOSTIC_RULE = "100%"     # Between-letter strictness
 WING_MODE = "SHOW_ALL"     # Wing word selection mode
 ```
 
+### Strictness
+
+`MESOSTIC_RULE` sets which letters a wing word may not contain.
+
+| Setting | Prohibited between spine letters                        | Canto I output |
+| ------- | ------------------------------------------------------- | -------------- |
+| `100%`  | both the previous spine letter and the one being sought | 209 characters |
+| `50%`   | only the letter being sought                            | 457 characters |
+| `0%`    | neither, so only the spine itself constrains the text   | 796 characters |
+
+`100%` is the rule Cage states and the default. The looser settings are this implementation's reading of a knob the source material does not define, and they exist to show what the prohibition is doing. Any other value raises.
+
 ### Wing Modes
 
 **SHOW_ALL** - Shows all valid options in brackets (within 45-char limit):
