@@ -5,6 +5,7 @@ hyphenator refuses to break them, so the index recorded a whole word where a
 syllable belonged.
 """
 
+import os
 import re
 
 import pytest
@@ -102,9 +103,14 @@ class TestCmuArbitration:
 class TestInvariants:
     """Properties that must hold for every word in the source text."""
 
-    @staticmethod
-    def corpus_words():
-        with open("corpus/canto_i.txt", encoding="utf-8") as source:
+    CORPUS = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                          "corpus", "canto_i.txt")
+
+    @classmethod
+    def corpus_words(cls):
+        # Anchored to this file, not the working directory: pytest can be
+        # invoked from anywhere.
+        with open(cls.CORPUS, encoding="utf-8") as source:
             return sorted({normalize(word) for word in source.read().split()} - {""})
 
     def test_split_reconstructs_the_word(self):
