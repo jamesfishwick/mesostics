@@ -237,7 +237,11 @@ def generate_mesostic():
             current_line_segments.append(selected_right)
         else:
             current_line_segments.extend(selected_right)
-        result_lines.append(' '.join(current_line_segments))
+
+    # A line that never reached its final spine letter is still work done, and
+    # dropping it loses every letter already presented on it.
+    if current_line_segments:
+        result_lines.append(' '.join(current_line_segments).strip())
     return result_lines
 
 
