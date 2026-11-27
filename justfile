@@ -21,3 +21,7 @@ compare:
 # Every measurement behind FINDINGS.md.
 analyse:
     uv run python analysis.py
+
+# Word-by-word account of Cage's walk. Pass a line count, e.g. `just trace 4`.
+trace lines="4":
+    uv run python trace.py {{lines}}
