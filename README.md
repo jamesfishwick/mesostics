@@ -69,6 +69,9 @@ pip install pyphen cmudict
 
 ```bash
 just run                   # generate the mesostic
+just compare               # our spine against Cage's, letter by letter
+just analyse               # every measurement behind FINDINGS.md
+just trace 4               # word-by-word account of Cage's walk
 just test                  # run the test suite
 just lint                  # ruff
 just                       # list every recipe

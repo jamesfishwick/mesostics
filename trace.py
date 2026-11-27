@@ -9,6 +9,11 @@ happened:
             printing it, and he read straight past
   ALLOWED   the rule permitted it as a wing word
 
+A tenth kind of row, MISSING, is printed where one of his spine words cannot
+be found in the scan at all. Eight of his choices are in that state, mostly
+OCR variants of hyphenated words. They are reported rather than skipped,
+because a trace that quietly drops a row is not an account of anything.
+
 Each span then says how many of its ALLOWED words he actually printed. That
 count is reliable; which ones is not, because a word like "and" occurs too
 often in a span to be aligned to a position with any confidence.
@@ -26,7 +31,7 @@ import cage
 from analysis import PP3_152, SPINE, cage_choices, corpus_words
 from syllables import extract_syllable_with_letter
 
-SPINE_MARK, BLOCKED, ALLOWED = "SPINE", "BLOCKED", "ALLOWED"
+SPINE_MARK, BLOCKED, ALLOWED, MISSING = "SPINE", "BLOCKED", "ALLOWED", "MISSING"
 
 
 def walk(limit_lines=4):
@@ -51,6 +56,9 @@ def walk(limit_lines=4):
                          if cage.bare(words[i]) == wanted
                          and letter in words[i].upper()), None)
         if position is None:
+            # His word is not in the scan. Say so; do not drop the row.
+            out.append((letter, -1, wanted, MISSING,
+                        "not found in the scan, probably an OCR variant"))
             continue
 
         forbidden = {previous, letter} - {None}
@@ -87,7 +95,8 @@ def as_markdown(rows, wing_counts=()):
             lines += ["", f"### Seeking **{letter}**", "", tally, "",
                       "| # | word | what happened | why |",
                       "| --- | --- | --- | --- |"]
-        lines.append(f"| {position} | `{word}` | {verdict} | {note} |")
+        where = "-" if position < 0 else position
+        lines.append(f"| {where} | `{word}` | {verdict} | {note} |")
     return "\n".join(lines)
 
 
@@ -97,7 +106,7 @@ def summary(rows):
         counts[verdict] = counts.get(verdict, 0) + 1
     total = sum(counts.values())
     out = ["", "## Totals", "", "| outcome | words | share |", "| --- | --- | --- |"]
-    for verdict in (SPINE_MARK, BLOCKED, ALLOWED):
+    for verdict in (SPINE_MARK, BLOCKED, ALLOWED, MISSING):
         n = counts.get(verdict, 0)
         out.append(f"| {verdict} | {n} | {100 * n / total:.0f}% |")
     accounted = total - counts.get(ALLOWED, 0)

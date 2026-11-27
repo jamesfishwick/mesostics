@@ -198,6 +198,21 @@ Why those three? `pallor` is the one candidate in Canto I whose own initial capi
 
 Testing this properly needs more corpus. The margin references say exactly which pages to add: page 11 unlocks his third line, pages 14-15 the fifth, and so on.
 
+## Reading the walk word by word
+
+`just trace 4` prints an account of every source word Cage covered. Each one gets exactly one verdict:
+
+| verdict | meaning                                                                    |
+| ------- | -------------------------------------------------------------------------- |
+| SPINE   | he marked it, and it presents a letter of the name                         |
+| BLOCKED | it carries one of the two letters in play, so the rule forbade printing it |
+| ALLOWED | the rule permitted it as a wing word                                       |
+| MISSING | his word is not in the scan, an OCR variant; four cases in thirty lines    |
+
+Each span also reports how many of its ALLOWED words he printed. The count is sound; which ones is not, because a word like `and` occurs too often inside one span to be placed with any confidence.
+
+Over his first two lines the rule settles 144 of 292 words. The span between `thEn` and `bronZe` allowed 124 wing words and he printed one. ALLOWED is the only column the rule does not account for, and it is where his taste lives.
+
 ## The figures in this document are tested
 
 Every number above is recomputed by `test_documented_figures.py` and checked against the text, so changing the code without changing the prose fails the suite rather than quietly leaving a wrong figure in print.

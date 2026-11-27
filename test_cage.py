@@ -148,13 +148,22 @@ class TestAnalysis:
         compared, agreed, unalignable = analysis.agreement()
         assert (compared, agreed, unalignable) == (313, 164, 8)
 
-    def test_the_trace_accounts_for_every_word(self):
+    @pytest.mark.parametrize("lines", [2, 4, 16, 30])
+    def test_the_trace_accounts_for_every_word(self, lines):
         """Every source word Cage covered gets exactly one verdict."""
         import trace as cage_trace
-        rows, _ = cage_trace.walk(2)
-        positions = [p for _, p, _, _, _ in rows]
+        rows, _ = cage_trace.walk(lines)
+        positions = [p for _, p, _, verdict, _ in rows if verdict != "MISSING"]
         assert positions == sorted(positions), "the walk must run forward"
         assert len(positions) == len(set(positions)), "no word classified twice"
         assert positions == list(range(positions[0], positions[-1] + 1)), "no gaps"
         verdicts = {v for *_, v, _ in rows}
-        assert verdicts <= {"SPINE", "BLOCKED", "ALLOWED"}
+        assert verdicts <= {"SPINE", "BLOCKED", "ALLOWED", "MISSING"}
+
+    def test_an_unfindable_word_is_reported_not_dropped(self):
+        """Silently skipping a row would make the totals a lie."""
+        import trace as cage_trace
+        rows, _ = cage_trace.walk(30)
+        missing = [r for r in rows if r[3] == "MISSING"]
+        assert missing, "the eight OCR variants must show up somewhere"
+        assert all(r[1] == -1 for r in missing)
