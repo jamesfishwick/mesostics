@@ -109,7 +109,7 @@ def walk(limit_lines=4):
                 continue
             bare = cage.bare(row[2])
             if bare not in printed:
-                out.append(row[:3] + (PASSED, "allowed, he printed it not"))
+                out.append(row[:3] + (PASSED, "allowed; he did not print it"))
             elif forced:
                 out.append(row[:3] + (PRINTED, "allowed, and his wing fixes it here"))
             else:
@@ -129,10 +129,28 @@ def walk(limit_lines=4):
     return out, wings
 
 
+def runs(rows):
+    """Collapse consecutive words that got the same verdict for the same reason.
+
+    Every word is still named. A run of thirty BLOCKED words is thirty words
+    in one cell rather than thirty rows, which is the difference between a
+    table that renders and one that does not.
+    """
+    out = []
+    for letter, position, word, verdict, note in rows:
+        if out and out[-1][0] == letter and out[-1][3] == verdict \
+                and out[-1][4] == note and verdict not in (SPINE_MARK, MISSING):
+            out[-1][2].append(word)
+            out[-1][1][1] = position
+        else:
+            out.append([letter, [position, position], [word], verdict, note])
+    return out
+
+
 def as_markdown(rows, wing_counts=()):
     """One table per spine letter, which is the unit the rule operates on."""
     lines, current, span = [], None, -1
-    for letter, position, word, verdict, note in rows:
+    for letter, (first, last), group, verdict, note in runs(rows):
         if letter != current:
             current = letter
             span += 1
@@ -140,12 +158,14 @@ def as_markdown(rows, wing_counts=()):
                           and r[3] in (PASSED, PRINTED, TIED))
             printed = wing_counts[span] if span < len(wing_counts) else "?"
             tally = (f"The rule allowed {allowed} wing words here. "
-                     f"He printed {printed}.")
+                     f"He printed {len(printed) if printed != '?' else '?'}.")
             lines += ["", f"### Seeking **{letter}**", "", tally, "",
-                      "| # | word | what happened | why |",
+                      "| # | words | what happened | why |",
                       "| --- | --- | --- | --- |"]
-        where = "-" if position < 0 else position
-        lines.append(f"| {where} | `{word}` | {verdict} | {note} |")
+        where = "-" if first < 0 else (f"{first}" if first == last else f"{first}-{last}")
+        shown = " ".join(f"`{w}`" for w in group)
+        count = "" if len(group) == 1 else f" _({len(group)})_"
+        lines.append(f"| {where} | {shown}{count} | {verdict} | {note} |")
     return "\n".join(lines)
 
 

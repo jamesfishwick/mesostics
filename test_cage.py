@@ -189,3 +189,30 @@ class TestAnalysis:
         missing = [r for r in rows if r[3] == "MISSING"]
         assert missing, "the eight OCR variants must show up somewhere"
         assert all(r[1] == -1 for r in missing)
+
+    @pytest.mark.parametrize("lines", [2, 4, 30])
+    def test_the_trace_renders_as_a_table(self, lines):
+        """Ragged rows break a markdown table silently; so does exceeding 512 KB."""
+        import trace as cage_trace
+        rows, wings = cage_trace.walk(lines)
+        text = cage_trace.as_markdown(rows, wings)
+
+        tables, run = [], []
+        for line in text.split("\n"):
+            if line.startswith("|"):
+                run.append(line)
+            elif run:
+                tables.append(run)
+                run = []
+        if run:
+            tables.append(run)
+        assert tables
+        for table in tables:
+            assert len({r.count("|") for r in table}) == 1, "ragged table"
+        assert len(text.encode()) < 512 * 1024, "GitHub truncates beyond 512 KB"
+
+    def test_collapsing_runs_loses_no_word(self):
+        import trace as cage_trace
+        rows, _ = cage_trace.walk(4)
+        collapsed = sum(len(group) for _, _, group, _, _ in cage_trace.runs(rows))
+        assert collapsed == len(rows)

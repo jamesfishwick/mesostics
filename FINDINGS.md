@@ -223,6 +223,8 @@ TIED is not an open decision. It is open provenance. Where his wing holds one `w
 
 So "what did Cage do with this word" has an answer for all 11,289, and 79 of them carry a tie over which identical token supplied an identical printed word.
 
+Consecutive words that got the same verdict for the same reason share a row, which is the difference between a table that renders and one that does not: thirty lines of trace is 6,244 rows and 383 KB rather than 11,597 rows and 594 KB, and GitHub stops rendering markdown at about 512 KB. Every word is still named in its row, and a test asserts the collapse loses none.
+
 ## The figures in this document are tested
 
 Every number above is recomputed by `test_documented_figures.py` and checked against the text, so changing the code without changing the prose fails the suite rather than quietly leaving a wrong figure in print.
