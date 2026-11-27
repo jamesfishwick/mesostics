@@ -7,19 +7,20 @@ happened:
   SPINE     he marked it, and it presents a letter of the name
   BLOCKED   it carries one of the two letters in play, so the rule forbade
             printing it, and he read straight past
-  ALLOWED   the rule permitted it as a wing word
+  PASSED    the rule allowed it and he demonstrably did not print it
+  PRINTED   the rule allowed it and he printed it
+  UNSETTLED the rule allowed it, he printed a word spelt the same, and the
+            span holds more than one, so which occurrence is his is unknown
 
-A tenth kind of row, MISSING, is printed where one of his spine words cannot
-be found in the scan at all. Eight of his choices are in that state, mostly
-OCR variants of hyphenated words. They are reported rather than skipped,
-because a trace that quietly drops a row is not an account of anything.
+PASSED and PRINTED are decided by subsequence alignment. The words he printed
+in a wing appear in source order, so they embed into that span's allowed words
+as a subsequence; where that embedding is unique the placement is forced, and
+where a word of his does not occur at all he plainly did not print it. Only a
+repeated common word inside one span leaves a choice, and that is UNSETTLED.
 
-Each span then says how many of its ALLOWED words he actually printed. That
-count is reliable; which ones is not, because a word like "and" occurs too
-often in a span to be aligned to a position with any confidence.
-
-ALLOWED is the only column the rule does not settle. It is where his taste
-lives, and it is the column to read to see what is still unknown.
+Over Cantos I-XXX this settles 99.3% of the words he covered. MISSING marks a
+spine word absent from the scan, four cases in thirty lines, reported rather
+than skipped: a trace that drops a row is not an account of anything.
 
     uv run python trace.py            # the first four lines
     uv run python trace.py 12         # the first twelve
@@ -31,7 +32,34 @@ import cage
 from analysis import PP3_152, SPINE, cage_choices, corpus_words
 from syllables import extract_syllable_with_letter
 
-SPINE_MARK, BLOCKED, ALLOWED, MISSING = "SPINE", "BLOCKED", "ALLOWED", "MISSING"
+SPINE_MARK, BLOCKED, MISSING = "SPINE", "BLOCKED", "MISSING"
+PASSED, PRINTED, UNSETTLED = "PASSED", "PRINTED", "UNSETTLED"
+
+
+def embeddings(allowed, printed):
+    """How many distinct ways `printed` sits inside `allowed` as a subsequence.
+
+    One means his wing can only have come from one set of positions, so every
+    word in the span is decided.
+    """
+    total = [1] + [0] * len(printed)
+    for word in allowed:
+        for j in range(len(printed), 0, -1):
+            if printed[j - 1] == word:
+                total[j] += total[j - 1]
+    return total[len(printed)]
+
+
+def printed_wings(limit_lines):
+    """The words he printed in each wing, in order, one list per span."""
+    out = []
+    for _, line in cage.load_reference()[:limit_lines]:
+        tokens = line.split()
+        marks = [i for i, w in enumerate(tokens) if any(c.isupper() for c in w)]
+        out.append([cage.bare(w) for w in tokens[:marks[0]]])
+        out.extend([cage.bare(w) for w in tokens[a + 1:b]]
+                   for a, b in zip(marks, marks[1:]))
+    return out
 
 
 def walk(limit_lines=4):
@@ -41,17 +69,11 @@ def walk(limit_lines=4):
     """
     words = corpus_words(PP3_152)
     choices = cage_choices()
-    # How many words he printed between each pair of spine words. Counting is
-    # sound even where aligning the individual words is not.
-    wing_counts = []
-    for _, line in cage.load_reference()[:limit_lines]:
-        tokens = line.split()
-        marks = [i for i, w in enumerate(tokens) if any(c.isupper() for c in w)]
-        wing_counts.append(len(tokens[:marks[0]]) if marks else 0)
-        wing_counts.extend(b - a - 1 for a, b in zip(marks, marks[1:]))
+    wings = printed_wings(limit_lines)
 
     out, index, cursor, previous = [], {}, 0, None
-    for letter, wanted in choices[:limit_lines * 5]:
+    for span, (letter, wanted) in enumerate(choices[:limit_lines * 5]):
+        printed = wings[span] if span < len(wings) else []
         position = next((i for i in range(cursor, len(words))
                          if cage.bare(words[i]) == wanted
                          and letter in words[i].upper()), None)
@@ -62,14 +84,30 @@ def walk(limit_lines=4):
             continue
 
         forbidden = {previous, letter} - {None}
+        span_rows, allowed = [], []
         for i in range(cursor, position):
             word = words[i]
             carried = sorted(set(word.upper()) & forbidden)
             if carried:
-                verdict, note = BLOCKED, "carries " + ",".join(carried)
+                span_rows.append((letter, i, word, BLOCKED,
+                                  "carries " + ",".join(carried)))
             else:
-                verdict, note = ALLOWED, "rule permits it as a wing"
-            out.append((letter, i, word, verdict, note))
+                allowed.append(cage.bare(word))
+                span_rows.append((letter, i, word, None, ""))
+
+        forced = bool(printed) and embeddings(allowed, printed) == 1
+        for n, row in enumerate(span_rows):
+            if row[3] is not None:
+                out.append(row)
+                continue
+            bare = cage.bare(row[2])
+            if bare not in printed:
+                out.append(row[:3] + (PASSED, "allowed, he printed it not"))
+            elif forced:
+                out.append(row[:3] + (PRINTED, "allowed, and his wing fixes it here"))
+            else:
+                out.append(row[:3] + (UNSETTLED,
+                                      "he printed this word, but the span holds more than one"))
 
         syllable = extract_syllable_with_letter(words[position], letter)
         repeat = syllable in index.get(letter, [])
@@ -78,7 +116,7 @@ def walk(limit_lines=4):
                     f"presents {letter} with syllable {syllable!r}"
                     + ("  REPEAT" if repeat else "")))
         cursor, previous = position + 1, letter
-    return out, wing_counts
+    return out, wings
 
 
 def as_markdown(rows, wing_counts=()):
@@ -88,7 +126,8 @@ def as_markdown(rows, wing_counts=()):
         if letter != current:
             current = letter
             span += 1
-            allowed = sum(1 for r in rows if r[0] == letter and r[3] == ALLOWED)
+            allowed = sum(1 for r in rows if r[0] == letter
+                          and r[3] in (PASSED, PRINTED, UNSETTLED))
             printed = wing_counts[span] if span < len(wing_counts) else "?"
             tally = (f"The rule allowed {allowed} wing words here. "
                      f"He printed {printed}.")
@@ -106,14 +145,18 @@ def summary(rows):
         counts[verdict] = counts.get(verdict, 0) + 1
     total = sum(counts.values())
     out = ["", "## Totals", "", "| outcome | words | share |", "| --- | --- | --- |"]
-    for verdict in (SPINE_MARK, BLOCKED, ALLOWED, MISSING):
+    for verdict in (SPINE_MARK, BLOCKED, PASSED, PRINTED, UNSETTLED, MISSING):
         n = counts.get(verdict, 0)
         out.append(f"| {verdict} | {n} | {100 * n / total:.0f}% |")
-    accounted = total - counts.get(ALLOWED, 0)
-    share = 100 * accounted / total
-    verdict = (f"The rule accounts for {accounted} of {total} words "
-               f"({share:.0f}%). The rest is his choice.")
-    out += ["", verdict]
+    settled = total - counts.get(UNSETTLED, 0)
+    open_ = counts.get(UNSETTLED, 0)
+    by_rule = counts.get(BLOCKED, 0) + counts.get(SPINE_MARK, 0)
+    first = (f"The rule decides {by_rule} of {total} words "
+             f"({100 * by_rule / total:.0f}%): it marked them or forbade them.")
+    second = (f"Alignment decides most of the rest, leaving {open_} genuinely "
+              f"open. {settled} of {total} ({100 * settled / total:.1f}%) "
+              f"are settled.")
+    out += ["", first, "", second]
     return "\n".join(out)
 
 

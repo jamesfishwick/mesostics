@@ -158,7 +158,25 @@ class TestAnalysis:
         assert len(positions) == len(set(positions)), "no word classified twice"
         assert positions == list(range(positions[0], positions[-1] + 1)), "no gaps"
         verdicts = {v for *_, v, _ in rows}
-        assert verdicts <= {"SPINE", "BLOCKED", "ALLOWED", "MISSING"}
+        assert verdicts <= {"SPINE", "BLOCKED", "PASSED", "PRINTED",
+                            "UNSETTLED", "MISSING"}
+
+    def test_almost_every_word_is_settled(self):
+        """A word he printed can usually be placed, because wings keep source order."""
+        import trace as cage_trace
+        rows, _ = cage_trace.walk(30)
+        unsettled = sum(1 for *_, v, _ in rows if v == "UNSETTLED")
+        assert (len(rows), unsettled) == (11289, 79)
+        assert 100 * (len(rows) - unsettled) / len(rows) > 99
+
+    def test_a_word_he_never_printed_is_not_left_open(self):
+        """UNSETTLED is only ever a word that appears in his wing."""
+        import trace as cage_trace
+        rows, wings = cage_trace.walk(4)
+        printed = {w for wing in wings for w in wing}
+        for _, _, word, verdict, _ in rows:
+            if verdict == "UNSETTLED":
+                assert cage.bare(word) in printed
 
     def test_an_unfindable_word_is_reported_not_dropped(self):
         """Silently skipping a row would make the totals a lie."""

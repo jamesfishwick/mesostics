@@ -200,18 +200,22 @@ Testing this properly needs more corpus. The margin references say exactly which
 
 ## Reading the walk word by word
 
-`just trace 4` prints an account of every source word Cage covered. Each one gets exactly one verdict:
+`just trace 30` prints an account of every source word Cage covered. Each one gets exactly one verdict:
 
-| verdict | meaning                                                                    |
-| ------- | -------------------------------------------------------------------------- |
-| SPINE   | he marked it, and it presents a letter of the name                         |
-| BLOCKED | it carries one of the two letters in play, so the rule forbade printing it |
-| ALLOWED | the rule permitted it as a wing word                                       |
-| MISSING | his word is not in the scan, an OCR variant; four cases in thirty lines    |
+| verdict   | meaning                                                                    | words |
+| --------- | -------------------------------------------------------------------------- | ----- |
+| SPINE     | he marked it, and it presents a letter of the name                         | 146   |
+| BLOCKED   | it carries one of the two letters in play, so the rule forbade printing it | 4,420 |
+| PASSED    | the rule allowed it and he demonstrably did not print it                   | 6,612 |
+| PRINTED   | the rule allowed it and he printed it                                      | 28    |
+| UNSETTLED | he printed a word spelt the same, and the span holds more than one         | 79    |
+| MISSING   | his word is not in the scan, an OCR variant                                | 4     |
 
-Each span also reports how many of its ALLOWED words he printed. The count is sound; which ones is not, because a word like `and` occurs too often inside one span to be placed with any confidence.
+**99.3% of the words he covered are settled.** The rule itself decides 40% of them, by marking a word or forbidding it. The rest are decided by alignment: the words he printed in a wing appear in source order, so they embed into that span's allowed words as a subsequence. Where that embedding is unique the placement is forced, and where a word of his does not occur in the span at all he plainly did not print it.
 
-Over his first two lines the rule settles 144 of 292 words. The span between `thEn` and `bronZe` allowed 124 wing words and he printed one. ALLOWED is the only column the rule does not account for, and it is where his taste lives.
+Only 79 words in thirty lines are genuinely open, and every one of them is a common word he printed that occurs more than once in its span: `in`, `of`, `the`, `with`. We know he printed one of them and not which.
+
+So the question "what did Cage do with this word" has an answer for all but 79 of 11,289.
 
 ## The figures in this document are tested
 
