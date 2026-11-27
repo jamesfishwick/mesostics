@@ -72,3 +72,26 @@ class TestReference:
     def test_load_reference_falls_back_without_an_extract(self, monkeypatch):
         monkeypatch.setattr(cage, "REFERENCE_PATH", "/nonexistent/cantos.tsv")
         assert cage.load_reference() == cage.CANTO_I
+
+
+class TestAnalysis:
+    """The measurements behind FINDINGS.md, pinned so the document stays true."""
+
+    def test_cage_took_the_first_candidate_six_times_in_nine(self):
+        import analysis
+        ranks = [rank for _, _, rank, _, _ in analysis.candidate_ranks()]
+        assert ranks == [1, 1, 1, 1, 3, 1, 2, 1, 2]
+
+    def test_no_filter_combination_beats_taking_the_first_word(self):
+        import analysis
+        best = analysis.search()[0][0]
+        assert best == analysis.score(()) == 4
+
+    def test_pallor_is_the_only_invisible_mark_among_our_picks(self):
+        import analysis
+        words = analysis.corpus_words()
+        ours = analysis.walk()
+        invisible = [w for w, letter in zip(ours, analysis.SPINE)
+                     if any(analysis.invisible_mark(src, letter)
+                            for src in words if cage.bare(src) == w)]
+        assert invisible == ["pallor"]

@@ -214,29 +214,9 @@ Cage's remaining lines are not in this repository. They are a copyrighted 1982 w
 
 ### The Pallor vs. sheeP Problem
 
-The first line matches perfectly, but at the second line (spelling POUND), our implementation selects "Pallor" for P while Cage uses "sheeP".
+Our implementation takes the first word that can present a letter. Cage did too, six times out of nine, which is why the EZRA line matches him exactly. At P he passed over `Pallor` and `upon` to reach `sheep`, and the rest of the POUND line follows from that one decision.
 
-**Analysis:**
-
-- Both words occur in Pound's source text after "Arms" (the previous spine word)
-- "Pallor" appears first: "Pallor upon me, cried to my men for more beasts; / Slaughtered the herds, sheep slain of bronze"
-- Source capitalization doesn't explain it: "upon" (lowercase) comes between them and also contains P
-
-**Letter composition:**
-
-- "Pallor" = P-a-l-l-**o**-r (contains **o**, a future letter in POUND)
-- "upon" = **u**-p-**o**-**n** (contains **u**, **o**, **n** all future letters)
-- "sheeP" = s-h-e-e-p (contains only **p** target + **e** previous, no future letters)
-
-**Revised Hypothesis:** A spine word can contain:
-
-- The target letter (required)
-- Previous spine letters already used (allowed, as in "bronZe" containing e)
-- But NO future spine letters (would burn syllables prematurely)
-
-This explains why Cage skips both "Pallor" (has future O) and "upon" (has future O, U, N) to reach "sheeP" (clean, only target + previous).
-
-**Next Step:** Implement filter to reject spine words containing any letters from EZRAPOUND that haven't been presented yet in sequence.
+Two explanations stood here for a while and both are now disproved by Cage's own text: that a spine word may carry no letter still to come (his `bronZe` carries R, `beaRing` carries A), and that he skipped words already capitalised in the source (he used `Pluto`). See [FINDINGS.md](FINDINGS.md) for the measurements and for what is still open.
 
 ## References
 

@@ -17,3 +17,7 @@ run:
 # Compare our spine against Cage's published text.
 compare:
     uv run python cage.py
+
+# Every measurement behind FINDINGS.md.
+analyse:
+    uv run python analysis.py
