@@ -4,6 +4,8 @@ The EZRA line is the one thing this implementation gets exactly right, so it
 is worth a regression guard. The POUND line is the open problem.
 """
 
+import collections
+
 import pytest
 
 import cage
@@ -159,7 +161,7 @@ class TestAnalysis:
         assert positions == list(range(positions[0], positions[-1] + 1)), "no gaps"
         verdicts = {v for *_, v, _ in rows}
         assert verdicts <= {"SPINE", "BLOCKED", "PASSED", "PRINTED",
-                            "TIED", "MISSING"}
+                            "TIED", "MISSING", "DECLINED", "SPENT"}
 
     def test_almost_every_word_is_placed(self):
         """A word he printed can usually be placed, because wings keep source order."""
@@ -216,3 +218,37 @@ class TestAnalysis:
         rows, _ = cage_trace.walk(4)
         collapsed = sum(len(group) for _, _, group, _, _ in cage_trace.runs(rows))
         assert collapsed == len(rows)
+
+    def test_declined_candidates_are_shown(self):
+        """The words he could have used and did not are the whole question."""
+        import trace as cage_trace
+        rows, _ = cage_trace.walk(2)
+        declined = [(w, note) for _, _, w, v, note in rows if v == "DECLINED"]
+        assert ("Pallor", "could have presented P as 'pal'") in declined
+        assert ("upon", "could have presented P as 'pon'") in declined
+
+    def test_no_declined_word_was_printed_in_its_own_span(self):
+        """It carries the letter in play, so printing it would break his rule.
+
+        Per span, not globally: he prints "and" in many wings, and that says
+        nothing about the "and" he declined forty spans later.
+        """
+        import trace as cage_trace
+        rows, wings = cage_trace.walk(30)
+        span, leaks, declined = 0, [], 0
+        for _, _, word, verdict, _ in rows:
+            if verdict in ("SPINE", "MISSING"):
+                span += 1
+            elif verdict == "DECLINED":
+                declined += 1
+                wing = wings[span] if span < len(wings) else []
+                if cage.bare(word) in wing:
+                    leaks.append(word)
+        assert declined > 300, "the check must actually examine something"
+        assert leaks == []
+
+    def test_spent_is_his_rule_and_declined_is_his_choice(self):
+        import trace as cage_trace
+        rows, _ = cage_trace.walk(30)
+        counts = collections.Counter(v for *_, v, _ in rows)
+        assert (counts["DECLINED"], counts["SPENT"]) == (379, 26)

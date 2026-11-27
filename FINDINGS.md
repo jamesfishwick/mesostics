@@ -202,16 +202,28 @@ Testing this properly needs more corpus. The margin references say exactly which
 
 `just trace 30` prints an account of every source word Cage covered. Each one gets exactly one verdict:
 
-| verdict | meaning                                                                    | words |
-| ------- | -------------------------------------------------------------------------- | ----- |
-| SPINE   | he marked it, and it presents a letter of the name                         | 146   |
-| BLOCKED | it carries one of the two letters in play, so the rule forbade printing it | 4,420 |
-| PASSED  | the rule allowed it and he demonstrably did not print it                   | 6,612 |
-| PRINTED | the rule allowed it and he printed it                                      | 28    |
-| TIED    | the span holds several words spelt alike, one of which he printed          | 79    |
-| MISSING | his word is not in the scan, an OCR variant                                | 4     |
+| verdict      | meaning                                                                     | words |
+| ------------ | --------------------------------------------------------------------------- | ----- |
+| SPINE        | he marked it, and it presents a letter of the name                          | 146   |
+| **DECLINED** | **it could have presented the letter sought, and he walked past it**        | 379   |
+| SPENT        | it carries the letter sought, but his no-repeat rule had used that syllable | 26    |
+| BLOCKED      | it carries one of the two letters in play, so the rule forbade printing it  | 4,015 |
+| PASSED       | the rule allowed it as a wing and he did not print it                       | 6,612 |
+| PRINTED      | the rule allowed it as a wing and he printed it                             | 28    |
+| TIED         | the span holds several words spelt alike, one of which he printed           | 79    |
+| MISSING      | his word is not in the scan, an OCR variant                                 | 4     |
 
-**Every decision he made is recoverable.** Which word presents each letter, and which words stand in each wing with their multiplicity, are all fixed by his text and the source together. The rule itself decides 40% of the words by marking one or forbidding it, and alignment places the rest: the words he printed in a wing appear in source order, so they embed into that span's allowed words as a subsequence, and a unique embedding forces the placement.
+**DECLINED is the column that matters.** It holds every word that could have presented the letter he was seeking, with a syllable he had not spent, and which he walked past anyway. 379 of them in thirty lines. His stated rules forbade none of them, and none was printed as a wing in its own span, which would have broken the between-letter prohibition.
+
+The P this project argued about longest is three rows:
+
+| #   | word     | verdict  | why                              |
+| --- | -------- | -------- | -------------------------------- |
+| 260 | `Pallor` | DECLINED | could have presented P as `pal`  |
+| 261 | `upon`   | DECLINED | could have presented P as `pon`  |
+| 273 | `sheep`  | SPINE    | presents P with syllable `sheep` |
+
+**Every decision he made is recoverable.** Which word presents each letter, and which words stand in each wing with their multiplicity, are all fixed by his text and the source together. The rule forces 36% of the words, by forbidding them or by having spent their syllable, and alignment places the rest: the words he printed in a wing appear in source order, so they embed into that span's allowed words as a subsequence, and a unique embedding forces the placement.
 
 TIED is not an open decision. It is open provenance. Where his wing holds one `with` and the span holds ten of them, exactly one was printed and nine were passed; both counts come from his own text, and the two readings produce the same line. Every tie in thirty lines is of that shape:
 

@@ -7,6 +7,10 @@ happened:
   SPINE     he marked it, and it presents a letter of the name
   BLOCKED   it carries one of the two letters in play, so the rule forbade
             printing it, and he read straight past
+  DECLINED  it could have presented the letter he was seeking, with a syllable
+            he had not spent, and he walked past it anyway
+  SPENT     it carries the letter he was seeking but its syllable was already
+            indexed, so his own no-repeat rule ruled it out
   PASSED    the rule allowed it and he demonstrably did not print it
   PRINTED   the rule allowed it and he printed it
   TIED      the rule allowed it, he printed a word spelt the same, and the
@@ -41,6 +45,7 @@ from syllables import extract_syllable_with_letter
 
 SPINE_MARK, BLOCKED, MISSING = "SPINE", "BLOCKED", "MISSING"
 PASSED, PRINTED, TIED = "PASSED", "PRINTED", "TIED"
+DECLINED, SPENT = "DECLINED", "SPENT"
 
 
 def embeddings(allowed, printed):
@@ -95,7 +100,18 @@ def walk(limit_lines=4):
         for i in range(cursor, position):
             word = words[i]
             carried = sorted(set(word.upper()) & forbidden)
-            if carried:
+            if letter in word.upper():
+                # It could have presented the letter. Say whether his own rule
+                # stopped him or he simply did not take it: this is the only
+                # column where his choice is visible.
+                spent = extract_syllable_with_letter(word, letter)
+                if spent in index.get(letter, []):
+                    span_rows.append((letter, i, word, SPENT,
+                                      f"syllable {spent!r} already presented {letter}"))
+                else:
+                    span_rows.append((letter, i, word, DECLINED,
+                                      f"could have presented {letter} as {spent!r}"))
+            elif carried:
                 span_rows.append((letter, i, word, BLOCKED,
                                   "carries " + ",".join(carried)))
             else:
@@ -175,16 +191,22 @@ def summary(rows):
         counts[verdict] = counts.get(verdict, 0) + 1
     total = sum(counts.values())
     out = ["", "## Totals", "", "| outcome | words | share |", "| --- | --- | --- |"]
-    for verdict in (SPINE_MARK, BLOCKED, PASSED, PRINTED, TIED, MISSING):
+    for verdict in (SPINE_MARK, DECLINED, SPENT, BLOCKED,
+                    PASSED, PRINTED, TIED, MISSING):
         n = counts.get(verdict, 0)
         out.append(f"| {verdict} | {n} | {100 * n / total:.0f}% |")
     tied = counts.get(TIED, 0)
-    by_rule = counts.get(BLOCKED, 0) + counts.get(SPINE_MARK, 0)
-    first = (f"The rule decides {by_rule} of {total} words "
-             f"({100 * by_rule / total:.0f}%): it marked them or forbade them.")
-    second = (f"Alignment places the rest. Every decision is recovered; {tied} "
-              f"words are tied, meaning the span holds several spelt alike and "
-              f"the counts are known but not which token is which.")
+    forced = counts.get(BLOCKED, 0) + counts.get(SPENT, 0)
+    chose = counts.get(DECLINED, 0) + counts.get(PASSED, 0) + counts.get(PRINTED, 0) + tied
+    first = (f"The rule forced {forced} of {total} words "
+             f"({100 * forced / total:.0f}%): it forbade printing them, or his "
+             f"own no-repeat rule had spent their syllable.")
+    second = (f"He chose over the other {chose} ({100 * chose / total:.0f}%). "
+              f"{counts.get(DECLINED, 0)} of those could have presented the "
+              f"letter he was seeking and he walked past them; that column is "
+              f"where his judgement is visible. {tied} words are tied, meaning "
+              f"the span holds several spelt alike and the counts are known "
+              f"but not which token is which.")
     out += ["", first, "", second]
     return "\n".join(out)
 
