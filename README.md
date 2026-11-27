@@ -176,6 +176,8 @@ Tokens are normalized before indexing, so `bronZe` and `bronZe,` present the sam
 just test
 ```
 
+`test_documented_figures.py` recomputes every number quoted in this file and in `FINDINGS.md` and asserts the text still says it, so a figure cannot go stale without the suite noticing.
+
 `test_syllables.py` covers the splitting and the index, `test_mesostics.py` the generator's state machine. The `test` and `lint` recipes are named for the global git hooks, which look for those two names and run them before a commit or push.
 
 ## Current Implementation Status

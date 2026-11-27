@@ -198,6 +198,14 @@ Why those three? `pallor` is the one candidate in Canto I whose own initial capi
 
 Testing this properly needs more corpus. The margin references say exactly which pages to add: page 11 unlocks his third line, pages 14-15 the fifth, and so on.
 
+## The figures in this document are tested
+
+Every number above is recomputed by `test_documented_figures.py` and checked against the text, so changing the code without changing the prose fails the suite rather than quietly leaving a wrong figure in print.
+
+That guard exists because two stale figures reached the repository. The pre-commit hook runs a markdown formatter that re-pads tables, so an edit written against the unformatted text matched nothing, did nothing, and said nothing. A test does not care how a table is padded.
+
+The check names the document each figure belongs to rather than accepting it anywhere, because a figure that is right in one file and stale in another is exactly the case that slipped through.
+
 ## Reproducing all of this
 
 ```bash
