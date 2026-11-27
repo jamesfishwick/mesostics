@@ -202,20 +202,26 @@ Testing this properly needs more corpus. The margin references say exactly which
 
 `just trace 30` prints an account of every source word Cage covered. Each one gets exactly one verdict:
 
-| verdict   | meaning                                                                    | words |
-| --------- | -------------------------------------------------------------------------- | ----- |
-| SPINE     | he marked it, and it presents a letter of the name                         | 146   |
-| BLOCKED   | it carries one of the two letters in play, so the rule forbade printing it | 4,420 |
-| PASSED    | the rule allowed it and he demonstrably did not print it                   | 6,612 |
-| PRINTED   | the rule allowed it and he printed it                                      | 28    |
-| UNSETTLED | he printed a word spelt the same, and the span holds more than one         | 79    |
-| MISSING   | his word is not in the scan, an OCR variant                                | 4     |
+| verdict | meaning                                                                    | words |
+| ------- | -------------------------------------------------------------------------- | ----- |
+| SPINE   | he marked it, and it presents a letter of the name                         | 146   |
+| BLOCKED | it carries one of the two letters in play, so the rule forbade printing it | 4,420 |
+| PASSED  | the rule allowed it and he demonstrably did not print it                   | 6,612 |
+| PRINTED | the rule allowed it and he printed it                                      | 28    |
+| TIED    | the span holds several words spelt alike, one of which he printed          | 79    |
+| MISSING | his word is not in the scan, an OCR variant                                | 4     |
 
-**99.3% of the words he covered are settled.** The rule itself decides 40% of them, by marking a word or forbidding it. The rest are decided by alignment: the words he printed in a wing appear in source order, so they embed into that span's allowed words as a subsequence. Where that embedding is unique the placement is forced, and where a word of his does not occur in the span at all he plainly did not print it.
+**Every decision he made is recoverable.** Which word presents each letter, and which words stand in each wing with their multiplicity, are all fixed by his text and the source together. The rule itself decides 40% of the words by marking one or forbidding it, and alignment places the rest: the words he printed in a wing appear in source order, so they embed into that span's allowed words as a subsequence, and a unique embedding forces the placement.
 
-Only 79 words in thirty lines are genuinely open, and every one of them is a common word he printed that occurs more than once in its span: `in`, `of`, `the`, `with`. We know he printed one of them and not which.
+TIED is not an open decision. It is open provenance. Where his wing holds one `with` and the span holds ten of them, exactly one was printed and nine were passed; both counts come from his own text, and the two readings produce the same line. Every tie in thirty lines is of that shape:
 
-So the question "what did Cage do with this word" has an answer for all but 79 of 11,289.
+| span | word | in span | he printed | so passed |
+| ---- | ---- | ------- | ---------- | --------- |
+| 1    | with | 10      | 1          | 9         |
+| 46   | in   | 5       | 1          | 4         |
+| 100  | of   | 17      | 1          | 16        |
+
+So "what did Cage do with this word" has an answer for all 11,289, and 79 of them carry a tie over which identical token supplied an identical printed word.
 
 ## The figures in this document are tested
 

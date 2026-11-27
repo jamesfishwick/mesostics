@@ -9,8 +9,9 @@ happened:
             printing it, and he read straight past
   PASSED    the rule allowed it and he demonstrably did not print it
   PRINTED   the rule allowed it and he printed it
-  UNSETTLED the rule allowed it, he printed a word spelt the same, and the
-            span holds more than one, so which occurrence is his is unknown
+  TIED      the rule allowed it, he printed a word spelt the same, and the
+            span holds several, so one of them is his and the rest were
+            passed over; which is which has no effect on the poem
 
 PASSED and PRINTED are decided by subsequence alignment. The words he printed
 in a wing appear in source order, so they embed into that span's allowed words
@@ -18,9 +19,15 @@ as a subsequence; where that embedding is unique the placement is forced, and
 where a word of his does not occur at all he plainly did not print it. Only a
 repeated common word inside one span leaves a choice, and that is UNSETTLED.
 
-Over Cantos I-XXX this settles 99.3% of the words he covered. MISSING marks a
-spine word absent from the scan, four cases in thirty lines, reported rather
-than skipped: a trace that drops a row is not an account of anything.
+Every decision Cage made is recoverable: which word presents each letter, and
+which words stand in each wing, with their multiplicity. TIED is not an open
+decision but open provenance. Where his wing holds one "with" and the span
+holds ten, exactly one was printed and nine were passed; the counts are fixed
+by his own text and the two readings produce the same line.
+
+MISSING marks a spine word absent from the scan, four cases in thirty lines,
+reported rather than skipped: a trace that drops a row is not an account of
+anything.
 
     uv run python trace.py            # the first four lines
     uv run python trace.py 12         # the first twelve
@@ -33,7 +40,7 @@ from analysis import PP3_152, SPINE, cage_choices, corpus_words
 from syllables import extract_syllable_with_letter
 
 SPINE_MARK, BLOCKED, MISSING = "SPINE", "BLOCKED", "MISSING"
-PASSED, PRINTED, UNSETTLED = "PASSED", "PRINTED", "UNSETTLED"
+PASSED, PRINTED, TIED = "PASSED", "PRINTED", "TIED"
 
 
 def embeddings(allowed, printed):
@@ -106,8 +113,11 @@ def walk(limit_lines=4):
             elif forced:
                 out.append(row[:3] + (PRINTED, "allowed, and his wing fixes it here"))
             else:
-                out.append(row[:3] + (UNSETTLED,
-                                      "he printed this word, but the span holds more than one"))
+                same = allowed.count(bare)
+                mine = printed.count(bare)
+                note = (f"{mine} of these {same} identical words went into "
+                        f"his wing, {same - mine} passed")
+                out.append(row[:3] + (TIED, note))
 
         syllable = extract_syllable_with_letter(words[position], letter)
         repeat = syllable in index.get(letter, [])
@@ -127,7 +137,7 @@ def as_markdown(rows, wing_counts=()):
             current = letter
             span += 1
             allowed = sum(1 for r in rows if r[0] == letter
-                          and r[3] in (PASSED, PRINTED, UNSETTLED))
+                          and r[3] in (PASSED, PRINTED, TIED))
             printed = wing_counts[span] if span < len(wing_counts) else "?"
             tally = (f"The rule allowed {allowed} wing words here. "
                      f"He printed {printed}.")
@@ -145,17 +155,16 @@ def summary(rows):
         counts[verdict] = counts.get(verdict, 0) + 1
     total = sum(counts.values())
     out = ["", "## Totals", "", "| outcome | words | share |", "| --- | --- | --- |"]
-    for verdict in (SPINE_MARK, BLOCKED, PASSED, PRINTED, UNSETTLED, MISSING):
+    for verdict in (SPINE_MARK, BLOCKED, PASSED, PRINTED, TIED, MISSING):
         n = counts.get(verdict, 0)
         out.append(f"| {verdict} | {n} | {100 * n / total:.0f}% |")
-    settled = total - counts.get(UNSETTLED, 0)
-    open_ = counts.get(UNSETTLED, 0)
+    tied = counts.get(TIED, 0)
     by_rule = counts.get(BLOCKED, 0) + counts.get(SPINE_MARK, 0)
     first = (f"The rule decides {by_rule} of {total} words "
              f"({100 * by_rule / total:.0f}%): it marked them or forbade them.")
-    second = (f"Alignment decides most of the rest, leaving {open_} genuinely "
-              f"open. {settled} of {total} ({100 * settled / total:.1f}%) "
-              f"are settled.")
+    second = (f"Alignment places the rest. Every decision is recovered; {tied} "
+              f"words are tied, meaning the span holds several spelt alike and "
+              f"the counts are known but not which token is which.")
     out += ["", first, "", second]
     return "\n".join(out)
 

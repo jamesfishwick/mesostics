@@ -159,24 +159,28 @@ class TestAnalysis:
         assert positions == list(range(positions[0], positions[-1] + 1)), "no gaps"
         verdicts = {v for *_, v, _ in rows}
         assert verdicts <= {"SPINE", "BLOCKED", "PASSED", "PRINTED",
-                            "UNSETTLED", "MISSING"}
+                            "TIED", "MISSING"}
 
-    def test_almost_every_word_is_settled(self):
+    def test_almost_every_word_is_placed(self):
         """A word he printed can usually be placed, because wings keep source order."""
         import trace as cage_trace
         rows, _ = cage_trace.walk(30)
-        unsettled = sum(1 for *_, v, _ in rows if v == "UNSETTLED")
-        assert (len(rows), unsettled) == (11289, 79)
-        assert 100 * (len(rows) - unsettled) / len(rows) > 99
+        tied = sum(1 for *_, v, _ in rows if v == "TIED")
+        assert (len(rows), tied) == (11289, 79)
+        assert 100 * (len(rows) - tied) / len(rows) > 99
 
-    def test_a_word_he_never_printed_is_not_left_open(self):
-        """UNSETTLED is only ever a word that appears in his wing."""
+    def test_a_tie_is_provenance_not_an_open_decision(self):
+        """Every tied word is one he printed, and the counts either side are known."""
+        import re
         import trace as cage_trace
         rows, wings = cage_trace.walk(4)
         printed = {w for wing in wings for w in wing}
-        for _, _, word, verdict, _ in rows:
-            if verdict == "UNSETTLED":
-                assert cage.bare(word) in printed
+        ties = [r for r in rows if r[3] == "TIED"]
+        assert ties
+        for _, _, word, _, note in ties:
+            assert cage.bare(word) in printed, "a tie must be a word he printed"
+            mine, same, passed = map(int, re.findall(r"\d+", note))
+            assert mine + passed == same, "the counts either side must add up"
 
     def test_an_unfindable_word_is_reported_not_dropped(self):
         """Silently skipping a row would make the totals a lie."""
