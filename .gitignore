@@ -23,3 +23,6 @@ corpus/output_ocr.pdf
 # Test artifacts
 .pytest_cache/
 .coverage
+
+# Cage reference text, extracted from a copy of the book (copyrighted)
+reference/

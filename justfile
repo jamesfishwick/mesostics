@@ -13,3 +13,7 @@ lint:
 # Generate the mesostic from the corpus.
 run:
     uv run python mesostics.py
+
+# Compare our spine against Cage's published text.
+compare:
+    uv run python cage.py

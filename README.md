@@ -198,6 +198,20 @@ The third line is where the text runs out. Every Z-bearing word in Canto I is `b
 spine incomplete: 'Z' of 'EZRAPOUND' was never presented because the source text ran out
 ```
 
+### Checking against Cage
+
+```bash
+just compare
+```
+
+`cage.py` runs the generator and matches its spine against Cage's, letter by letter. The score is **4 of 9**: the EZRA line is exact and the POUND line agrees on nothing. Both outcomes are pinned by tests, so a change that fixes POUND will be noticed rather than missed.
+
+The reference is verified character for character against _X: Writings '79-'82_, p. 109.
+
+Only that one pair of Cage's lines is comparable. _Writing Through the Cantos_ runs to 198 mesostic lines, and each carries a margin reference to the page of _The Cantos_ it was drawn from; those references run from 3 to 782, so Cage wrote through the whole book while `corpus/canto_i.txt` holds pages 3 to 5. Every later line needs words we do not have. Those page references are also the roadmap for widening the comparison: add page 11 to the corpus and line 3 becomes checkable, and so on.
+
+Cage's remaining lines are not in this repository. They are a copyrighted 1982 work and committing all 198 would republish it. `cage.extract_from_pdf()` rebuilds them from a copy of the book into `reference/`, which is outside version control.
+
 ### The Pallor vs. sheeP Problem
 
 The first line matches perfectly, but at the second line (spelling POUND), our implementation selects "Pallor" for P while Cage uses "sheeP".

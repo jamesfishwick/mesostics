@@ -139,8 +139,12 @@ def select_wing_words(candidates, mode):
         # Default to MAX
         return candidates
 
-def generate_mesostic():
-    """Walk the source text once, spelling the spine word down the page."""
+def generate_mesostic(spine_out=None):
+    """Walk the source text once, spelling the spine word down the page.
+
+    Pass a list as `spine_out` to receive the (letter, word) pairs that were
+    chosen, which is what a comparison against Cage's own text needs.
+    """
     syllable_index = {}  # {letter: [used_syllables]}
     blocked = {}  # {letter: [syllables rejected because already indexed]}
     result_lines = []  # Each element is a complete line
@@ -232,6 +236,8 @@ def generate_mesostic():
                     current_line_segments.append(spine_word)
 
                 syllable_index.setdefault(current_letter, []).append(syllable)
+                if spine_out is not None:
+                    spine_out.append((current_letter, word))
                 previous_letter = current_letter
                 current_letter_idx += 1
 
