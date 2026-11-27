@@ -32,6 +32,8 @@ CAGE_PP3_11 = CAGE_CANTO_I + ["the", "glazes", "upturned", "as",
 HERE = cage.os.path.dirname(cage.os.path.abspath(__file__))
 CANTO_I = cage.os.path.join(HERE, "corpus", "canto_i.txt")
 PP3_11 = cage.os.path.join(HERE, "corpus", "cantos_pp3-11.txt")
+PP3_152 = cage.os.path.join(HERE, "corpus", "cantos_pp3-152.txt")
+PAGE_LIMIT = 152  # Cantos I-XXX, as far as the corpus reaches
 
 
 def corpus_words(path=None):
@@ -160,6 +162,53 @@ def search():
         for combo in itertools.combinations(FILTERS, n):
             out.append((score(combo), combo, walk(combo)))
     return sorted(out, key=lambda row: -row[0])
+
+
+def cage_choices(limit=PAGE_LIMIT):
+    """(letter, word) for every spine presentation Cage made up to `limit`."""
+    out, page = [], 0
+    for ref, line in cage.load_reference():
+        if ref != "?":
+            page = int(ref.split("-")[0])
+        if page > limit:
+            break
+        out.extend((letter, cage.bare(word))
+                   for letter, word in cage.presentations(line))
+    return out
+
+
+def agreement(words=None, target=None):
+    """Would we pick Cage's word? Measured with the cursor anchored to his.
+
+    Following our own choices lets one disagreement move the cursor and drag
+    every later letter with it, which measures cascade rather than judgement.
+    Anchoring to his position asks the only question that matters at each step:
+    of the words admissible here, is his the first?
+
+    Returns (compared, agreed, unalignable).
+    """
+    words = corpus_words(PP3_152) if words is None else words
+    target = cage_choices() if target is None else target
+    index, cursor = {}, 0
+    agreed = compared = unalignable = 0
+
+    for letter, wanted in target:
+        his = next((i for i in range(cursor, len(words))
+                    if cage.bare(words[i]) == wanted and letter in words[i].upper()), None)
+        if his is None:
+            unalignable += 1          # absent from the scan, or an OCR variant
+            continue
+        admissible = [
+            i for i in range(cursor, his + 1)
+            if letter in words[i].upper()
+            and extract_syllable_with_letter(words[i], letter) not in index.get(letter, [])
+        ]
+        if admissible:
+            compared += 1
+            agreed += admissible[0] == his
+        index.setdefault(letter, []).append(extract_syllable_with_letter(words[his], letter))
+        cursor = his + 1
+    return compared, agreed, unalignable
 
 
 def oracle_walk(words=None, target=None):
@@ -325,6 +374,12 @@ def report():
             verdict = "disqualified" if rejected else "survives"
             print(f"  {name:<16} rejects {rejected:4d}/{total}  {verdict}"
                   + (f"  e.g. {', '.join(examples[:4])}" if rejected else ""))
+
+    if cage.os.path.exists(PP3_152):
+        compared, agreed, unalignable = agreement()
+        print("\nDOES HE TAKE THE FIRST ADMISSIBLE WORD? (Cantos I-XXX)")
+        print(f"  {agreed} of {compared} choices  ({100 * agreed / compared:.0f}%)"
+              f"   {unalignable} not alignable")
 
     print("\nFILTER COMBINATIONS, scored against Cage")
     for value, combo, picked in search()[:5]:

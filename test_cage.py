@@ -142,3 +142,8 @@ class TestAnalysis:
                 continue  # needs source capitalisation, which his text lost
             rejected, total = counts
             assert rejected > 0, f"{name} now survives {total} choices: re-examine it"
+
+    def test_he_takes_the_first_admissible_word_just_over_half_the_time(self):
+        import analysis
+        compared, agreed, unalignable = analysis.agreement()
+        assert (compared, agreed, unalignable) == (317, 170, 8)

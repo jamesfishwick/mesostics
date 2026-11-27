@@ -59,11 +59,19 @@ Nothing yet survives. `invisible-mark` is the one live candidate and the one we 
 
 What would settle it is more source. Every eight pages or so of _The Cantos_ adds roughly eighteen more of his choices to the training half, while the 884 stay available to disqualify whatever the search turns up. At that point a filter surviving both halves would be worth believing.
 
+### A caveat the larger corpus exposed
+
+This project reports 97.9% agreement with CMU, and that is agreement on **how many** syllables a word has, not on **where** the boundaries fall. Those are different claims. On the 56,851 words where pyphen and the corrected SSP split both match the CMU count, the two disagree about where to cut **39%** of the time, and neither is reliably right: pyphen gives `aard-vark` where SSP gives the impossible `aar-dvark`, while SSP gives `ab-di-cate` where pyphen gives `ab-dic-ate`.
+
+We take pyphen when it matches the count, so we record `car-din-al` and index `din` for N. The syllabification is `car-di-nal`, which would index `nal`. The consequence showed up directly: `cardinal` and `jardin` both index `din`, our run calls the second a repeat, and Cage's own word gets blocked.
+
+So the word-level result above, that he never reused a word to present a letter, stands on nothing but exact string equality and is safe. Every syllable-level claim in this document rests on a boundary convention that is right about 60% of the time, and should be read accordingly.
+
 ## The evidence base
 
 198 mesostic lines, 106 spelling EZRA and 92 spelling POUND, carrying 884 spine presentations between them. Each pair of lines carries a margin reference to the page of _The Cantos_ it was drawn from, and those references run from 3 to 782.
 
-`corpus/cantos_pp3-11.txt` now carries printed pages 3 to 11 of the New Directions edition, which is as far as his first four lines reach. The rest of the evidence is structural: what his choices have in common, not what we could have chosen instead.
+`corpus/cantos_pp3-152.txt` carries printed pages 3 to 152 of the New Directions edition, Cantos I to XXX, 28,387 words. Those cantos were published in 1925 and 1930 and are out of US copyright. They cover 317 of Cage's 884 spine choices, up from the 18 that Canto I alone could reach. The rest of the evidence is structural: what his choices have in common, not what we could have chosen instead.
 
 **He read the source continuously.** The margin reference marks where a pair _ends_, not a window he jumped to. His third line opens `thE narrow glaZes the uptuRned nipple As`, and `narrow` is not on page 11 at all: it is Canto I's "Unsheathed the narrow sword", back on page 4. The rest of that line is page 11. So he carried straight on from where the previous pair stopped.
 

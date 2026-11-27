@@ -8,7 +8,7 @@ A mesostic is a poetic form where a vertical "spine" runs down the middle of the
 
 This implementation generates mesostics from Ezra Pound's _Canto I_ using the spine word "EZRAPOUND".
 
-`corpus/` also carries printed pages 3 to 11 of the New Directions _Cantos_, which is the stretch Cage's first four lines draw on. Those cantos were published in 1925 and are out of copyright in the US. See [FINDINGS.md](FINDINGS.md) for what comparing against him shows.
+`corpus/` also carries printed pages 3 to 152 of the New Directions _Cantos_, Cantos I to XXX, which covers 317 of Cage's 884 spine choices. Those cantos were published in 1925 and 1930 and are out of copyright in the US. See [FINDINGS.md](FINDINGS.md) for what comparing against him shows.
 
 ## Cage's Rules
 
