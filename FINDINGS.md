@@ -36,9 +36,28 @@ Step 6 holds in 476 of 479 printed wing words. The exceptions:
 
 Two are the word `in`; the third is a word already printed once on its own line. Small, repeated, easy to skim past when you are doing this by hand.
 
-### What cannot be stated
+### What is not yet stated, and why
 
-Which admissible word he picked, and which admissible wing words he printed. Two of his seven independent deviations are words whose own capital is the spine letter, where marking would show nothing. The other five, and every wing decision, are not reducible to any rule this project can test.
+Which admissible word he picked, and which admissible wing words he printed.
+
+That is a statement about this investigation, not about Cage. He was doing something; we have not found it. Two of his seven independent deviations are words whose own capital is the spine letter, where marking would show nothing. The other five resist every rule tried so far.
+
+The obstacle is statistical power. We can score a hypothesis against eighteen of his choices, because eighteen is as far as the corpus reaches, and six candidate filters over eighteen points will fit noise readily. They do. Widening the search from letter-membership rules to source position and word shape turns up `line-initial + very-short`, which lifts the end-to-end score from 4 of 18 to 7 of 18 and looks like a result.
+
+It is not one. Run that filter against his full output and it rejects 109 of his own 884 spine words, among them `Of`, `thE`, `As`, `tO`, `rUy` and `oN` — several of which sit inside the eighteen it was fitted to. A rule Cage followed cannot reject words Cage chose.
+
+So his 884 presentations are the test set, and `analysis.disqualify()` applies them to any proposed filter:
+
+| filter         | rejects | verdict                                      |
+| -------------- | ------- | -------------------------------------------- |
+| next-letter    | 104/884 | disqualified                                 |
+| segment-future | 298/884 | disqualified                                 |
+| name-future    | 483/884 | disqualified                                 |
+| invisible-mark | —       | untestable: he recased everything he printed |
+
+Nothing yet survives. `invisible-mark` is the one live candidate and the one we cannot check, because his text does not record which words Pound had capitalised.
+
+What would settle it is more source. Every eight pages or so of _The Cantos_ adds roughly eighteen more of his choices to the training half, while the 884 stay available to disqualify whatever the search turns up. At that point a filter surviving both halves would be worth believing.
 
 ## The evidence base
 

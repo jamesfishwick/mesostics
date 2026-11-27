@@ -133,3 +133,12 @@ class TestAnalysis:
             for (l1, p1), (l2, p2) in zip(picks, picks[1:])
         )
         assert (len(picks), dirty) == (18, 9)
+
+    def test_every_letter_filter_is_disqualified_by_cages_own_words(self):
+        import analysis
+        for name in analysis.FILTERS:
+            counts, _ = analysis.disqualify(name)
+            if counts is None:
+                continue  # needs source capitalisation, which his text lost
+            rejected, total = counts
+            assert rejected > 0, f"{name} now survives {total} choices: re-examine it"

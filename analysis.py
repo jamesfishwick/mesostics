@@ -250,6 +250,33 @@ def source_spans(words=None, target=None):
     return spans, sum(1 for *_, f in spans if f)
 
 
+def disqualify(name, rows=None):
+    """How many of Cage's own 884 choices a filter would have rejected.
+
+    This is the guard against fitting noise. Scoring a filter on the eighteen
+    letters our corpus reaches is fitting six parameters to eighteen points,
+    and a three-point gain there means nothing. His whole output is the test
+    set: a filter that is really his rule rejects none of his own words, so any
+    count above zero disqualifies it however well it scored.
+
+    Filters needing source capitalisation cannot be checked this way, because
+    Cage recased everything he printed. They are returned as None.
+    """
+    if name in SOURCE_ONLY_FILTERS:
+        return None, None
+    rows = cage.load_reference() if rows is None else rows
+    test = FILTERS[name]
+    rejected, total, examples = 0, 0, []
+    for _, line in rows:
+        for letter, word in cage.presentations(line):
+            total += 1
+            if test(word, letter):
+                rejected += 1
+                if len(examples) < 6:
+                    examples.append(word)
+    return (rejected, total), examples
+
+
 def report():
     print("CAGE'S STATED RULE, against his own wings")
     try:
@@ -287,6 +314,17 @@ def report():
         print(f"\nSOURCE SPANS between his spine words: {len(spans)}")
         print(f"  carrying a word he was not allowed to print: {dirty}")
         print("  -> the prohibition governs the page, not the path")
+
+    print("\nOVERFITTING GUARD: what each filter costs on his full output")
+    for name in FILTERS:
+        counts, examples = disqualify(name)
+        if counts is None:
+            print(f"  {name:<16} untestable (needs source capitalisation)")
+        else:
+            rejected, total = counts
+            verdict = "disqualified" if rejected else "survives"
+            print(f"  {name:<16} rejects {rejected:4d}/{total}  {verdict}"
+                  + (f"  e.g. {', '.join(examples[:4])}" if rejected else ""))
 
     print("\nFILTER COMBINATIONS, scored against Cage")
     for value, combo, picked in search()[:5]:
