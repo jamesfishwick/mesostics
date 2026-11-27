@@ -6,7 +6,9 @@ Notes from comparing this implementation against _Writing Through the Cantos_ (_
 
 198 mesostic lines, 106 spelling EZRA and 92 spelling POUND, carrying 884 spine presentations between them. Each pair of lines carries a margin reference to the page of _The Cantos_ it was drawn from, and those references run from 3 to 782.
 
-Our corpus is Canto I, pages 3 to 5. So exactly one of Cage's pairs is reproducible here, and the rest of the evidence is structural: what his choices have in common, not what we could have chosen instead.
+`corpus/cantos_pp3-11.txt` now carries printed pages 3 to 11 of the New Directions edition, which is as far as his first four lines reach. The rest of the evidence is structural: what his choices have in common, not what we could have chosen instead.
+
+**He read the source continuously.** The margin reference marks where a pair _ends_, not a window he jumped to. His third line opens `thE narrow glaZes the uptuRned nipple As`, and `narrow` is not on page 11 at all: it is Canto I's "Unsheathed the narrow sword", back on page 4. The rest of that line is page 11. So he carried straight on from where the previous pair stopped.
 
 ## Cage kept his own rule, and we can say how closely
 
@@ -60,7 +62,36 @@ For the one pair we can reproduce, here is where Cage's choice sat among the wor
 
 **Six times out of nine he took the first word available.** That is what this implementation does, and it is why the EZRA line comes out exactly right.
 
-Three times he did not, and no filter we have tried explains those three. Searching all sixteen combinations of the four candidate filters, nothing beats taking the first word:
+### Scoring a whole run understates the agreement
+
+Run end to end against his first four lines, this implementation scores 4 of 18. That number is close to meaningless. One different choice moves the cursor, and every later letter is then picked from a different stretch of text, so a single disagreement at P drags eighteen letters down with it.
+
+Correcting as we go separates the decisions Cage really made differently from the cascade behind them:
+
+|                                      |              |
+| ------------------------------------ | ------------ |
+| letters where we pick his word first | **11 of 18** |
+| independent deviations               | **7**        |
+
+So he took the first admissible word about 60% of the time, and the implementation is far closer to him than a naive score suggests.
+
+### The seven deviations
+
+| letter | he took | he passed over |
+| ------ | ------- | -------------- |
+| P      | sheep   | `Pallor`, upon |
+| U      | Pluto   | `Poured`       |
+| D      | praised | and            |
+| E      | the     | `Proserpine;`  |
+| Z      | glazes  | azure          |
+| P      | speak   | `Poggio`       |
+| D      | goods,  | and            |
+
+Two of the seven are words whose own initial capital _is_ the spine letter, so marking them would show nothing: `Pallor` and `Poggio`. That is a real pattern and it covers the case this project has argued about longest. It does not cover the other five.
+
+What the other five have in common is softer. Cage's lines read as near-continuous source phrases: `glaZes the uptuRned nipple As` is a straight lift from "The silvery water glazes the upturned nipple. As Poggio has remarked", and `sPeak tO rUy oN his gooDs` runs along "no man speak to, feed, help Ruy Diaz, On pain... and all his goods sequestered". The words he passed over are scattered earlier in the text and would have broken the phrase. That is an aesthetic criterion, not a mechanical one, and this project cannot test it.
+
+Searching all sixteen combinations of the four candidate filters, nothing beats taking the first word:
 
 ```
 4/9  (none)

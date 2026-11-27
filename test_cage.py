@@ -95,3 +95,16 @@ class TestAnalysis:
                      if any(analysis.invisible_mark(src, letter)
                             for src in words if cage.bare(src) == w)]
         assert invisible == ["pallor"]
+
+    def test_the_cascade_accounts_for_most_of_the_divergence(self):
+        import analysis
+        rows, agreed, deviations = analysis.oracle_walk()
+        assert (len(rows), agreed, deviations) == (18, 11, 7)
+
+    def test_cage_read_the_source_continuously(self):
+        """His line 3 pulls "narrow" from page 4 and the rest from page 11."""
+        import analysis
+        words = [cage.bare(w) for w in analysis.corpus_words(analysis.PP3_11)]
+        narrow, glazes = words.index("narrow"), words.index("glazes")
+        assert narrow < 400, "narrow should sit in Canto I, on page 4"
+        assert glazes > 1500, "glazes should sit on page 11"

@@ -17,14 +17,25 @@ from syllables import extract_syllable_with_letter
 SPINE = "EZRAPOUND"
 SEGMENT = {letter: ("EZRA" if letter in "EZRA" else "POUND") for letter in SPINE}
 
-# Cage's choices for the one pair of lines our corpus can produce.
+# Cage's choices for the one pair of lines Canto I alone can produce.
 CAGE_CANTO_I = ["then", "bronze", "bearing", "arms",
                 "sheep", "of", "pluto", "strong", "praised"]
 
+# His first four lines, reachable once the corpus runs to printed page 11.
+# He read the source continuously: "narrow" in line 3 comes from Canto I's
+# "Unsheathed the narrow sword" on page 4, while the rest of that line is on
+# page 11. The margin reference marks where a pair ends, not a window he
+# jumped to.
+CAGE_PP3_11 = CAGE_CANTO_I + ["the", "glazes", "upturned", "as",
+                              "speak", "to", "ruy", "on", "goods"]
 
-def corpus_words():
-    with open(cage.os.path.join(cage.os.path.dirname(cage.os.path.abspath(__file__)),
-                                "corpus", "canto_i.txt"), encoding="utf-8") as text:
+HERE = cage.os.path.dirname(cage.os.path.abspath(__file__))
+CANTO_I = cage.os.path.join(HERE, "corpus", "canto_i.txt")
+PP3_11 = cage.os.path.join(HERE, "corpus", "cantos_pp3-11.txt")
+
+
+def corpus_words(path=None):
+    with open(path or CANTO_I, encoding="utf-8") as text:
         return text.read().split()
 
 
@@ -151,6 +162,40 @@ def search():
     return sorted(out, key=lambda row: -row[0])
 
 
+def oracle_walk(words=None, target=None):
+    """Walk the spine, taking Cage's word whenever ours differs.
+
+    Scoring a run end to end understates the agreement badly, because one
+    different choice shifts the cursor and every later letter is picked from a
+    different stretch of text. Correcting as we go separates the decisions
+    Cage actually made differently from the cascade behind them.
+
+    Returns (rows, agreed, deviations) where each row is
+    (letter, cage_word, our_first_pick, rank_of_cage_word, candidates).
+    """
+    words = corpus_words(PP3_11) if words is None else words
+    target = CAGE_PP3_11 if target is None else target
+    index, cursor, rows, agreed = {}, 0, [], 0
+
+    for letter, wanted in zip(itertools.cycle(SPINE), target):
+        candidates = [
+            (i, cage.bare(words[i])) for i in range(cursor, len(words))
+            if letter in words[i].upper()
+            and extract_syllable_with_letter(words[i], letter) not in index.get(letter, [])
+        ]
+        if not candidates:
+            break
+        ours = candidates[0][1]
+        rank = next((n for n, (_, w) in enumerate(candidates, 1) if w == wanted), None)
+        agreed += ours == wanted
+        rows.append((letter, wanted, ours, rank, len(candidates)))
+        position = next((i for i, w in candidates if w == wanted), candidates[0][0])
+        index.setdefault(letter, []).append(
+            extract_syllable_with_letter(words[position], letter))
+        cursor = position + 1
+    return rows, agreed, len(rows) - agreed
+
+
 def candidate_ranks(words=None):
     """For each letter, where Cage's choice sat among the admissible words.
 
@@ -198,6 +243,14 @@ def report():
     for letter, chosen, rank, total, passed in candidate_ranks():
         note = "first available" if rank == 1 else "passed over " + ", ".join(passed)
         print(f"  {letter}  {chosen:<9} rank {rank} of {total:<4} {note}")
+
+    if cage.os.path.exists(PP3_11):
+        print("\nAGAINST FOUR OF CAGE'S LINES, corpus to printed page 11")
+        rows, agreed, deviations = oracle_walk()
+        for letter, wanted, ours, rank, total in rows:
+            note = "we agree" if ours == wanted else f"we took {ours} (his was {rank} of {total})"
+            print(f"  {letter}  {wanted:<10} {note}")
+        print(f"  -> {agreed}/{len(rows)} on first try, {deviations} independent deviations")
 
     print("\nFILTER COMBINATIONS, scored against Cage")
     for value, combo, picked in search()[:5]:
