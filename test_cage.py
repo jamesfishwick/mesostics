@@ -108,3 +108,28 @@ class TestAnalysis:
         narrow, glazes = words.index("narrow"), words.index("glazes")
         assert narrow < 400, "narrow should sit in Canto I, on page 4"
         assert glazes > 1500, "glazes should sit on page 11"
+
+    def test_the_prohibition_governs_printing_not_reading(self):
+        """He walks past forbidden words in the source without printing them."""
+        import itertools
+
+        import analysis
+        from syllables import extract_syllable_with_letter as syl
+        words = analysis.corpus_words(analysis.PP3_11)
+        index, cursor, picks = {}, 0, []
+        for letter, wanted in zip(itertools.cycle(analysis.SPINE), analysis.CAGE_PP3_11):
+            pos = next((i for i in range(cursor, len(words))
+                        if letter in words[i].upper()
+                        and cage.bare(words[i]) == wanted
+                        and syl(words[i], letter) not in index.get(letter, [])), None)
+            if pos is None:
+                break
+            picks.append((letter, pos))
+            index.setdefault(letter, []).append(syl(words[pos], letter))
+            cursor = pos + 1
+
+        dirty = sum(
+            any(set(w.upper()) & {l1, l2} for w in words[p1 + 1:p2])
+            for (l1, p1), (l2, p2) in zip(picks, picks[1:])
+        )
+        assert (len(picks), dirty) == (18, 9)

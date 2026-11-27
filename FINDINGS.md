@@ -2,6 +2,44 @@
 
 Notes from comparing this implementation against _Writing Through the Cantos_ (_X: Writings '79-'82_, pp. 109-116). Every number here comes from `just analyse`, which reads Cage's own text rather than anybody's recollection of it.
 
+## What Cage did
+
+Stated as a procedure, with every step backed by a measurement over his own text. Where he made a choice the rule does not force, the step says so rather than inventing a reason.
+
+1. **Read the source once, forward.** One continuous pass through _The Cantos_, front to back, never returning. His margin references climb from page 2 to page 781 with two backward steps in about 190, and his third line pulls `narrow` from page 4 while the rest of that line sits on page 11.
+
+2. **Spell EZRAPOUND down the page, four letters then five.** EZRA on one line, POUND on the next, repeating. 106 EZRA lines and 92 POUND lines.
+
+3. **To present a letter, take some later word containing it and capitalise that letter.** The rest of the word is unconstrained. Every letter-membership rule we tested rejects between 104 and 483 of his own 884 choices: `bronZe` carries R, `beaRing` carries A, `thEn` carries N. ◆ _Which_ word is his choice. He takes the first available one about 60% of the time.
+
+4. **A word may present two letters at once.** Three times across the piece, as in `sEa-jauZionda`.
+
+5. **Never present the same letter with the same word twice.** Across all 884 presentations, zero exceptions.
+
+6. **Between two consecutive spine letters, print no word containing either of them.** 476 of 479 printed wing words obey. ◆ _How many_ of the admissible words to print is his choice: between `bronZe` and `beaRing` the rule allows four and he printed two; after `Arms` it allowed one and he printed none.
+
+7. **The prohibition governs the page, not the path.** He reads straight past prohibited words without printing them. Nine of the seventeen source spans between his first eighteen spine words contain a word carrying a forbidden letter, including the `Pallor` and `upon` he walked over to reach `sheeP`.
+
+8. **Recase everything.** Source capitals are dropped and only the spine letter is capitalised, so the mark is the only capital. Pound's `And` becomes `and`; his `Pluto` becomes `plUto`.
+
+Steps 1, 2, 4, 5, 6 and 8 are mechanical and this implementation now follows all of them. Steps 3 and 6 each carry a ◆, and those two choices are the whole of the remaining gap.
+
+### Three places he slipped
+
+Step 6 holds in 476 of 479 printed wing words. The exceptions:
+
+| word       | carries | line                                                      |
+| ---------- | ------- | --------------------------------------------------------- |
+| `in`       | N       | `Praise Or sextUs had seeN her in lyDia walks with`       |
+| `bull-dog` | U       | `mr P. his bull-dOg me stUrge m;s bull-dog taberNam Dish` |
+| `in`       | N       | `toPaze a thrOne having it sqUsh in his excelleNt Dum`    |
+
+Two are the word `in`; the third is a word already printed once on its own line. Small, repeated, easy to skim past when you are doing this by hand.
+
+### What cannot be stated
+
+Which admissible word he picked, and which admissible wing words he printed. Two of his seven independent deviations are words whose own capital is the spine letter, where marking would show nothing. The other five, and every wing decision, are not reducible to any rule this project can test.
+
 ## The evidence base
 
 198 mesostic lines, 106 spelling EZRA and 92 spelling POUND, carrying 884 spine presentations between them. Each pair of lines carries a margin reference to the page of _The Cantos_ it was drawn from, and those references run from 3 to 782.

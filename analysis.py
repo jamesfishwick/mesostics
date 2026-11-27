@@ -220,6 +220,36 @@ def candidate_ranks(words=None):
     return out
 
 
+def source_spans(words=None, target=None):
+    """Do the source stretches between his spine words carry forbidden letters?
+
+    If they do, the between-letter prohibition is about what Cage printed, not
+    about where he was allowed to put a spine word. Returns (spans, dirty).
+    """
+    words = corpus_words(PP3_11) if words is None else words
+    target = CAGE_PP3_11 if target is None else target
+    index, cursor, picks = {}, 0, []
+    for letter, wanted in zip(itertools.cycle(SPINE), target):
+        position = next((i for i in range(cursor, len(words))
+                         if letter in words[i].upper()
+                         and cage.bare(words[i]) == wanted
+                         and extract_syllable_with_letter(words[i], letter)
+                         not in index.get(letter, [])), None)
+        if position is None:
+            break
+        picks.append((letter, position))
+        index.setdefault(letter, []).append(
+            extract_syllable_with_letter(words[position], letter))
+        cursor = position + 1
+
+    spans = []
+    for (first, start), (second, end) in zip(picks, picks[1:]):
+        forbidden = [w for w in words[start + 1:end]
+                     if set(w.upper()) & {first, second}]
+        spans.append((first, second, end - start - 1, forbidden))
+    return spans, sum(1 for *_, f in spans if f)
+
+
 def report():
     print("CAGE'S STATED RULE, against his own wings")
     try:
@@ -251,6 +281,12 @@ def report():
             note = "we agree" if ours == wanted else f"we took {ours} (his was {rank} of {total})"
             print(f"  {letter}  {wanted:<10} {note}")
         print(f"  -> {agreed}/{len(rows)} on first try, {deviations} independent deviations")
+
+    if cage.os.path.exists(PP3_11):
+        spans, dirty = source_spans()
+        print(f"\nSOURCE SPANS between his spine words: {len(spans)}")
+        print(f"  carrying a word he was not allowed to print: {dirty}")
+        print("  -> the prohibition governs the page, not the path")
 
     print("\nFILTER COMBINATIONS, scored against Cage")
     for value, combo, picked in search()[:5]:
