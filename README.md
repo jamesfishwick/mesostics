@@ -8,7 +8,7 @@ A mesostic is a poetic form where a vertical "spine" runs down the middle of the
 
 This implementation generates mesostics from Ezra Pound's _Canto I_ using the spine word "EZRAPOUND".
 
-`corpus/` also carries printed pages 3 to 152 of the New Directions _Cantos_, Cantos I to XXX, which covers 317 of Cage's 884 spine choices. Those cantos were published in 1925 and 1930 and are out of copyright in the US. See [FINDINGS.md](FINDINGS.md) for what comparing against him shows.
+`corpus/` also carries printed pages 3 to 152 of the New Directions _Cantos_, Cantos I to XXX, which covers 313 of Cage's 884 spine choices. Those cantos were published in 1925 and 1930 and are out of copyright in the US. See [FINDINGS.md](FINDINGS.md) for what comparing against him shows.
 
 ## Cage's Rules
 
@@ -154,12 +154,17 @@ Cage's index records the syllable that presents a letter, so the split has to be
 | Step                          | Role                                                                                                                                           |
 | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | CMU Pronouncing Dictionary    | Counts nuclei. Supplies no character offsets, so it arbitrates rather than splits.                                                             |
-| `pyphen`                      | First candidate. Its patterns respect morpheme boundaries, which read well when they are right.                                                |
+| Maximal onset                 | First candidate. Gives each syllable the longest onset English allows, which is the phonological convention an index keyed on sound wants.     |
+| `pyphen`                      | Second. Its patterns respect morpheme boundaries, which read well when they are right, but they are hyphenation points rather than syllables.  |
 | Sonority sequencing (SSP)     | Ranks each character by sonority and cuts at every trough. Splits short words that pyphen will not.                                            |
 | Silent `e` / `-ed` correction | SSP reads orthography, so it hears a nucleus in every written vowel. This removes the two English endings that are written but not pronounced. |
 | Merge or hiatus split         | Closes the gap when no candidate hits the count.                                                                                               |
 
-Accuracy against CMU rises from 53.4% to **97.9%**, with no word losing characters to the split. The residue is initialisms such as `abc`, which are three syllables aloud and offer no orthographic boundary to find.
+Two different claims live here and this project kept blurring them.
+
+**How many** syllables a word has: CMU settles it, and agreement rises from 53.4% to **98.9%**, with no word losing characters to the split. The residue is initialisms such as `abc`, which are three syllables aloud and offer no orthographic boundary to find.
+
+**Where** the boundaries fall: CMU says nothing, so this needs its own ground truth. The convention is maximal onset, and `test_boundaries.py` measures it against hand-checked words. Getting the count right does not get the cut right: pyphen offers `car-din-al`, which is a fair place to break a line and the wrong place to split a syllable. It collided with `jar-din` in the index and blocked one of Cage's own words, which is how the confusion surfaced.
 
 Words outside CMU (proper nouns, Pound's coinages like `napenerve` and `closewebbed`) have no authoritative count, and fall back to the corrected SSP split.
 

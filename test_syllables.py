@@ -54,7 +54,7 @@ def test_monosyllables_stay_whole(word):
     "word,expected",
     [
         ("interest", ["in", "terest"]),
-        ("particular", ["par", "tic", "u", "lar"]),
+        ("particular", ["par", "ti", "cu", "lar"]),
         ("slaughtered", ["slaugh", "tered"]),
         ("chaos", ["cha", "os"]),
     ],

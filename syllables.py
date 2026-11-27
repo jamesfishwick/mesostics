@@ -12,10 +12,14 @@ nuclei a word has, and the boundaries come from whichever orthographic splitter
 agrees with that count. CMU supplies no character offsets of its own, which is
 why it arbitrates rather than splits.
 
-Measured over the 124,892 scoreable entries in CMU, pyphen alone agrees with the
-CMU count 53.4% of the time. What follows agrees 97.9%, and no split loses a
-character. The residue is initialisms such as "abc", three syllables aloud with
-no orthographic boundary to find.
+Counting syllables and placing the boundaries are separate problems and CMU
+only settles the first. Over its 124,892 scoreable entries, pyphen alone agrees
+with the count 53.4% of the time and what follows agrees 98.9%, with no split
+losing a character; the residue is initialisms such as "abc", three syllables
+aloud with no orthographic boundary to find.
+
+Where the cuts go is a convention, not a measurement against CMU. This module
+uses maximal onset, and test_boundaries.py holds it to hand-checked words.
 """
 
 import functools
@@ -80,6 +84,63 @@ def cmu_syllable_count(word):
     )
 
 
+# Consonant clusters English allows at the start of a syllable. Maximal onset
+# gives the following syllable the longest of these it can take, and the
+# consonants left over close the syllable before: "car-di-nal", not
+# "car-din-al". Single consonants are always legal and are not listed.
+_ONSETS = frozenset({
+    "bl", "br", "ch", "cl", "cr", "dr", "dw", "fl", "fr", "gl", "gn",
+    "gr", "kl", "kn", "kr", "ph", "pl", "pn", "pr", "ps", "qu", "rh",
+    "sc", "sch", "scr", "sh", "shm", "shr", "sk", "sl", "sm", "sn",
+    "sp", "spl", "spr", "squ", "st", "str", "sw", "th", "thr", "tr",
+    "tw", "wh", "wr",
+})
+
+
+def _max_onset_split(word):
+    """Cut between vowel groups, giving each syllable the longest legal onset.
+
+    This is the phonological convention, and it is the one an index keyed on
+    sound wants. A hyphenator answers a different question and puts the cut
+    where a printer may break the line, which is why it offers "car-din-al".
+    """
+    groups = list(re.finditer(r"[aeiouy]+", word))
+    if len(groups) < 2:
+        return [word]
+
+    cuts = []
+    for current, following in zip(groups, groups[1:]):
+        run = word[current.end():following.start()]
+        if not run:
+            cuts.append(current.end())
+            continue
+        # Longest tail of the run that can open the next syllable, but never
+        # the whole run when that would leave the previous syllable open on a
+        # doubled consonant ("hap-py", not "ha-ppy").
+        onset = 0
+        for size in range(min(3, len(run)), 0, -1):
+            tail = run[-size:]
+            # A medial "s" closes the syllable before rather than opening the
+            # next, but only when nothing else would close it: "mis-ter" and
+            # "as-tro-naut", against "ham-ster" where the m already does.
+            if size > 1 and tail[0].lower() == "s" and size == len(run):
+                continue
+            if size == 1 or tail.lower() in _ONSETS:
+                # A doubled consonant splits: "hap-py", never "ha-ppy".
+                if size == len(run) and len(run) == 2 and run[0].lower() == run[1].lower():
+                    continue
+                onset = size
+                break
+        cuts.append(following.start() - onset)
+
+    parts, start = [], 0
+    for cut in cuts:
+        parts.append(word[start:cut])
+        start = cut
+    parts.append(word[start:])
+    return _attach_vowelless(parts)
+
+
 def _pyphen_split(word):
     return [piece for piece in _pyphen_dic.inserted(word).split("-") if piece]
 
@@ -126,13 +187,19 @@ def _attach_vowelless(parts):
 
 
 def _corrected_ssp_split(word):
-    """SSP, with the two endings English spells but does not pronounce.
+    """SSP, with the two endings English spells but does not pronounce."""
+    return _drop_silent_endings(_ssp_split(word))
 
-    SSP reads orthography, so it hears a nucleus in every written vowel. Final
-    silent "e" and the "-ed" of a regular past tense are written vowels that are
-    not syllables, and they are where SSP over-splits: "ste-ri-le", "co-ve-red".
+
+def _drop_silent_endings(parts):
+    """Fuse the written vowels English does not pronounce into the syllable before.
+
+    Any splitter reading orthography hears a nucleus in every written vowel.
+    Final silent "e" and the "-ed" of a regular past tense are the two that are
+    not syllables, and they are where such a splitter over-cuts: "ste-ri-le",
+    "co-ve-red".
     """
-    parts = _ssp_split(word)
+    parts = list(parts)
 
     while len(parts) > 1:
         last = parts[-1]
@@ -225,6 +292,7 @@ def _syllabify_normalized(normalized):
     cached value immutable so a caller mutating its list cannot poison it.
     """
     candidates = (
+        _drop_silent_endings(_max_onset_split(normalized)),
         _pyphen_split(normalized),
         _corrected_ssp_split(normalized),
         _ssp_split(normalized),
@@ -232,7 +300,10 @@ def _syllabify_normalized(normalized):
 
     target = cmu_syllable_count(normalized)
     if target is None:
-        return tuple(candidates[1])
+        # No authoritative count. Maximal onset is the best general splitter:
+        # the only candidate that neither under-splits a short word nor hears
+        # a nucleus in a silent ending.
+        return tuple(candidates[0])
     # "hmm" and "shh" are all consonant, so CMU counts no nuclei. Every word
     # still has to yield at least one piece for the index to hold.
     target = max(1, target)

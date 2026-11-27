@@ -146,4 +146,15 @@ class TestAnalysis:
     def test_he_takes_the_first_admissible_word_just_over_half_the_time(self):
         import analysis
         compared, agreed, unalignable = analysis.agreement()
-        assert (compared, agreed, unalignable) == (317, 170, 8)
+        assert (compared, agreed, unalignable) == (313, 164, 8)
+
+    def test_the_trace_accounts_for_every_word(self):
+        """Every source word Cage covered gets exactly one verdict."""
+        import trace as cage_trace
+        rows, _ = cage_trace.walk(2)
+        positions = [p for _, p, _, _, _ in rows]
+        assert positions == sorted(positions), "the walk must run forward"
+        assert len(positions) == len(set(positions)), "no word classified twice"
+        assert positions == list(range(positions[0], positions[-1] + 1)), "no gaps"
+        verdicts = {v for *_, v, _ in rows}
+        assert verdicts <= {"SPINE", "BLOCKED", "ALLOWED"}

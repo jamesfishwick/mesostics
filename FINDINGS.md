@@ -59,19 +59,28 @@ Nothing yet survives. `invisible-mark` is the one live candidate and the one we 
 
 What would settle it is more source. Every eight pages or so of _The Cantos_ adds roughly eighteen more of his choices to the training half, while the 884 stay available to disqualify whatever the search turns up. At that point a filter surviving both halves would be worth believing.
 
-### A caveat the larger corpus exposed
+### A confusion the larger corpus exposed, since fixed
 
-This project reports 97.9% agreement with CMU, and that is agreement on **how many** syllables a word has, not on **where** the boundaries fall. Those are different claims. On the 56,851 words where pyphen and the corrected SSP split both match the CMU count, the two disagree about where to cut **39%** of the time, and neither is reliably right: pyphen gives `aard-vark` where SSP gives the impossible `aar-dvark`, while SSP gives `ab-di-cate` where pyphen gives `ab-dic-ate`.
+This project reported 97.9% agreement with CMU without saying what agreed. CMU settles **how many** syllables a word has and says nothing about **where** the boundaries fall, and the two were being quoted as one number.
 
-We take pyphen when it matches the count, so we record `car-din-al` and index `din` for N. The syllabification is `car-di-nal`, which would index `nal`. The consequence showed up directly: `cardinal` and `jardin` both index `din`, our run calls the second a repeat, and Cage's own word gets blocked.
+The cost was not theoretical. Taking pyphen whenever its count matched meant recording `car-din-al`, which indexes `din` for N. The syllabification is `car-di-nal`, which indexes `nal`. So `cardinal` and `jardin` both indexed `din`, the run called the second a repeat, and one of Cage's own words was blocked. That is how the confusion surfaced.
 
-So the word-level result above, that he never reused a word to present a letter, stands on nothing but exact string equality and is safe. Every syllable-level claim in this document rests on a boundary convention that is right about 60% of the time, and should be read accordingly.
+Both halves are now measured separately:
+
+| claim                         | ground truth                      | result               |
+| ----------------------------- | --------------------------------- | -------------------- |
+| how many syllables a word has | CMU, 124,892 entries              | **98.9%**            |
+| where the cut falls           | maximal onset, hand-checked words | `test_boundaries.py` |
+
+A maximal-onset splitter now leads the candidates, so the cut goes where the phonology puts it rather than where a printer may break a line. Count agreement rose from 97.9% to 98.9% as a side effect.
+
+The word-level result above, that Cage never reused a word to present a letter, rests on exact string equality and was never affected. Syllable-level claims now rest on a stated convention rather than an unexamined one.
 
 ## The evidence base
 
 198 mesostic lines, 106 spelling EZRA and 92 spelling POUND, carrying 884 spine presentations between them. Each pair of lines carries a margin reference to the page of _The Cantos_ it was drawn from, and those references run from 3 to 782.
 
-`corpus/cantos_pp3-152.txt` carries printed pages 3 to 152 of the New Directions edition, Cantos I to XXX, 28,387 words. Those cantos were published in 1925 and 1930 and are out of US copyright. They cover 317 of Cage's 884 spine choices, up from the 18 that Canto I alone could reach. The rest of the evidence is structural: what his choices have in common, not what we could have chosen instead.
+`corpus/cantos_pp3-152.txt` carries printed pages 3 to 152 of the New Directions edition, Cantos I to XXX, 28,387 words. Those cantos were published in 1925 and 1930 and are out of US copyright. They cover 313 of Cage's 884 spine choices, up from the 18 that Canto I alone could reach. The rest of the evidence is structural: what his choices have in common, not what we could have chosen instead.
 
 **He read the source continuously.** The margin reference marks where a pair _ends_, not a window he jumped to. His third line opens `thE narrow glaZes the uptuRned nipple As`, and `narrow` is not on page 11 at all: it is Canto I's "Unsheathed the narrow sword", back on page 4. The rest of that line is page 11. So he carried straight on from where the previous pair stopped.
 
@@ -138,7 +147,15 @@ Correcting as we go separates the decisions Cage really made differently from th
 | letters where we pick his word first | **11 of 18** |
 | independent deviations               | **7**        |
 
-So he took the first admissible word about 60% of the time, and the implementation is far closer to him than a naive score suggests.
+Over the full Cantos I-XXX corpus, with the cursor anchored to his position at every step so no disagreement can drag later letters with it:
+
+|                                                    |               |
+| -------------------------------------------------- | ------------- |
+| choices compared                                   | **313**       |
+| where we would pick his word                       | **164 (52%)** |
+| not alignable (absent from the scan, OCR variants) | 8             |
+
+The eighteen-letter sample said 61%. At 313 it is 52%, so the small sample was mildly optimistic but not misleading. He takes the first admissible word slightly more often than not, and the implementation is far closer to him than a naive end-to-end score suggests.
 
 ### The seven deviations
 
