@@ -77,6 +77,16 @@ The rule fails in one place. He reaches rank seven or beyond at 5.8% where the r
 
 Those eighteen are the only part of his selection still unaccounted for. Everything else is the rate.
 
+Three structural explanations for them have been tested and none holds:
+
+| hypothesis                                                          | result                                                                                                         |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| he was moving to a new page of the source                           | deep reaches sit at a page change 11% of the time against a 7% base rate                                       |
+| the candidates were clustered, so rank overstates how far he walked | no: he walks 91 words at the median against 7 for the rest                                                     |
+| he skipped pages, so our count includes words he never read         | no: his page jumps are smaller at deep reaches, and the largest jump in the piece, 59 pages, lands on a rank 1 |
+
+The excess is real rather than noise: 18 observed against 3.4 expected over 310 choices. A heavier-tailed distribution would fit the curve, and fitting a curve is not an explanation. Whatever was happening on those eighteen occasions is not in the text, the page references, or the shape of the candidate list.
+
 ## What can be said about his choosing
 
 Two tendencies, measured over the 678 candidates he declined and the 319 he took.
