@@ -32,7 +32,21 @@ CANTO_I = [
 
 
 def presentations(line):
-    """(spine letter, word carrying it), in order. A word may carry two."""
+    """(spine letter, word carrying it), in order.
+
+    A token here may carry two capitals, and that is not always one of Pound's
+    words. Checked against a full text of the Cantos, "ritz-carlton" is his
+    and genuinely presents both Z and R, while "sea-jauzionda" and "up-other"
+    are not: the first is "sea" from page 21 beside "jauzionda" from page 22,
+    the second "up" from "up-stairs" beside "other", each pair joined by a
+    hyphen Cage put there because no wing fell between them.
+
+    They are left joined all the same. Splitting them makes the alignment hunt
+    for "sea" and "up", which occur everywhere in Pound, and it matched the
+    wrong ones: 100 lost alignments against 4. So one word of the three really
+    does present two letters, and the count below treats all three as if they
+    did.
+    """
     return [(char, word) for word in line.split()
             for char in word if char.isupper()]
 

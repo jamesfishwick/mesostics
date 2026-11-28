@@ -20,6 +20,12 @@ Four of the words that could not be placed have since been resolved by reading C
 
 The two that remain are `sEa-jauZionda` and `uP-Other`, both single hyphenated tokens in his text that our Cantos scan renders differently. They are printed in his book exactly as quoted here, so the mismatch is real and not an extraction slip.
 
+The two that remain, `sEa-jauZionda` and `uP-Other`, are not damage at all. They are two spine words each, joined by a hyphen Cage put there because no wing fell between them. Pound has `sea` on page 21 and `jauzionda` on page 22; he has `up-stairs`, and further on `other`. Neither `sea-jauzionda` nor `up-other` occurs anywhere in the Cantos, which is how the question was settled, using a second full text too damaged to read words from but good enough to answer whether a string occurs.
+
+That corrects rule 3. Three tokens appear to carry two spine letters and only one does: `ritZ-caRlton` is Pound's own compound. The other two are Cage's typography.
+
+The parser leaves all three joined. Splitting them sends the alignment hunting for `sea` and `up`, which occur throughout Pound, and it matched the wrong ones: 100 alignments lost against 4 recovered. The rule is stated correctly here while the code still counts the old way, and the docstring in `cage.py` says so.
+
 **So corpus quality is not a limit on anything here.** Six of Cage's words remain unfindable, and the damage in those is mine rather than the Cantos scan's: it is in the text extracted from the PDF of _X: Writings '79-'82_, where `rotterdam` came out as `rotterdm`. Cage read a printed book. Both scans in this project are mine, one of his pages and one of Pound's, and a word lost in the first cannot be recovered from the second.
 
 ## The rule set
@@ -30,7 +36,7 @@ Seven rules. Five are certain, one is a fitted model, one is unsolved.
 | - | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------- |
 | 1 | Read the source once, forward, never returning             | page references climb 2 to 781 with 2 backward steps in ~190; `narrow` comes from page 4 in a line otherwise on page 11 | certain          |
 | 2 | Spell EZRAPOUND down the page, four letters then five      | 106 EZRA lines, 92 POUND                                                                                                | certain          |
-| 3 | A word may present two letters at once                     | 3 occurrences, e.g. `sEa-jauZionda`                                                                                     | certain          |
+| 3 | A word may present two letters at once                     | once, in Pound's `Ritz-Carlton`, which carries Z and R                                                                  | certain          |
 | 4 | Never present a letter with a syllable already spent on it | 884 presentations, zero reuse                                                                                           | certain          |
 | 5 | Between two spine letters, print no word carrying either   | 476 of 479 printed wing words                                                                                           | certain, 3 slips |
 | 6 | Recase, so the mark is the only capital                    | `And`→`and`, `Pluto`→`plUto`                                                                                            | certain          |
@@ -66,7 +72,7 @@ Stated as a procedure, with every step backed by a measurement over his own text
 
 3. **To present a letter, take some later word containing it and capitalise that letter.** The rest of the word is unconstrained. Every letter-membership rule we tested rejects between 104 and 483 of his own 884 choices: `bronZe` carries R, `beaRing` carries A, `thEn` carries N. ◆ _Which_ word is his choice. He takes the first available one about 60% of the time.
 
-4. **A word may present two letters at once.** Three times across the piece, as in `sEa-jauZionda`.
+4. **A word may present two letters at once.** Once, in Pound's hyphenated `Ritz-Carlton`, which presents Z and R together. Two other tokens look like it and are not: see below.
 
 5. **Never present the same letter with the same word twice.** Across all 884 presentations, zero exceptions.
 
