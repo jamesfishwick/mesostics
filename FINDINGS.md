@@ -28,6 +28,28 @@ The parser leaves all three joined. Splitting them sends the alignment hunting f
 
 **So corpus quality is not a limit on anything here.** Six of Cage's words remain unfindable, and the damage in those is mine rather than the Cantos scan's: it is in the text extracted from the PDF of _X: Writings '79-'82_, where `rotterdam` came out as `rotterdm`. Cage read a printed book. Both scans in this project are mine, one of his pages and one of Pound's, and a word lost in the first cannot be recovered from the second.
 
+## A rule the project assumed and his text denies
+
+The README cites a 45-character limit per wing, taken from two secondary sources, and `mesostics.py` has enforced it since the first commit. Measured against his own 435 non-empty wings:
+
+|               |                   |
+| ------------- | ----------------- |
+| median wing   | **4 characters**  |
+| longest wing  | **27 characters** |
+| wings over 45 | **0**             |
+
+The limit never binds. Whatever those sources describe, it is not a constraint Cage was working against in this piece: he is an order of magnitude sparser than it allows. Reading the limit as a rule gets his practice backwards, since the thing that needs explaining is why he prints so little, not what stopped him printing more.
+
+### Two rules confirmed over his whole output
+
+Rule 4 holds exactly: across all 884 presentations, no word ever presents the same letter twice. And it is per letter rather than per word, as the rule says: 44 words are used as spine words more than once, `over` three times, each for a different letter.
+
+### Where my reading of his book runs out
+
+Cage's lines look as though they break the EZRA and POUND alternation 26 times. At least one of those is my extraction rather than his typesetting: between two apparently adjacent POUND lines sits `papEr bust-up of braZilian securities s.A. securities`, which should spell EZRA and comes through as E, Z, A with the R capital lost.
+
+So the alternation is probably strict and this project cannot prove it. Of 360 candidate lines in the extraction only 198 carry a clean EZRA or POUND, and a looser classifier leaves 73 fitting neither, because scan noise adds capitals as readily as it drops them. That is a limit of my reading of his pages, not of the evidence: a clean text of his eight pages would settle it.
+
 ## The rule set
 
 Seven rules. Five are certain, two are fitted models.

@@ -293,3 +293,28 @@ class TestAnalysis:
                 reused.append((letter, cage.bare(word)))
         assert len(reused) == 10
         assert ("R", "from") in reused
+
+    def test_the_45_character_wing_limit_never_binds(self):
+        """Secondary sources give it as a rule. His text never approaches it."""
+        import analysis
+        lengths = analysis.wing_lengths()
+        assert len(lengths) == 435
+        assert max(lengths) == 27, "if this ever passes 45 the limit may be real"
+        assert sorted(lengths)[len(lengths) // 2] == 4
+
+    def test_no_word_presents_the_same_letter_twice(self):
+        """Rule 4, over every one of his presentations rather than a sample."""
+        import collections
+        pairs = [(letter, cage.bare(word))
+                 for _, line in cage.load_reference()
+                 for letter, word in cage.presentations(line)]
+        repeats = {k: v for k, v in collections.Counter(pairs).items() if v > 1}
+        assert repeats == {}
+
+    def test_a_word_may_present_different_letters(self):
+        """Rule 4 is per letter, so the same word elsewhere is allowed."""
+        import collections
+        words = [cage.bare(w) for _, line in cage.load_reference()
+                 for _, w in cage.presentations(line)]
+        reused = {k: v for k, v in collections.Counter(words).items() if v > 1}
+        assert len(reused) > 30, "he reuses words across letters freely"

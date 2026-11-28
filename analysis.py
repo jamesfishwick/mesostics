@@ -405,6 +405,26 @@ def cage_spine_words(limit_lines=200):
     return [w for _, _, w, v, _ in rows if v == cage_trace.SPINE_MARK]
 
 
+def wing_lengths(rows=None):
+    """How long his wings actually are, in characters.
+
+    Secondary sources give a 45-character limit per wing, and this project
+    took it as a rule. His own text never approaches it.
+    """
+    rows = cage.load_reference() if rows is None else rows
+    out = []
+    for _, line in rows:
+        tokens = line.split()
+        marks = [i for i, w in enumerate(tokens) if any(c.isupper() for c in w)]
+        if not marks:
+            continue
+        spans = ([tokens[:marks[0]]]
+                 + [tokens[a + 1:b] for a, b in zip(marks, marks[1:])]
+                 + [tokens[marks[-1] + 1:]])
+        out += [len(" ".join(s)) for s in spans if s]
+    return out
+
+
 def report():
     print("CAGE'S STATED RULE, against his own wings")
     try:
@@ -472,6 +492,14 @@ def report():
         total = len(cage_spine_words())
         print(f"  -> and yet {taken_caps} of his {total} choices are capitalised,"
               f" so it is a bias and not a rule")
+
+    lengths = wing_lengths()
+    lengths.sort()
+    print("\nTHE 45-CHARACTER WING LIMIT, against his own text")
+    print(f"  {len(lengths)} non-empty wings: median {lengths[len(lengths)//2]}, "
+          f"longest {lengths[-1]}")
+    print(f"  wings over 45 characters: {sum(1 for n in lengths if n > 45)}")
+    print("  -> the limit never binds, so it is not a rule he was working to")
 
     print("\nFILTER COMBINATIONS, scored against Cage")
     for value, combo, picked in search()[:5]:
