@@ -280,3 +280,16 @@ class TestAnalysis:
         declined = sum(1 for *_, v, _ in rows if v == "DECLINED")
         taken = sum(1 for *_, v, _ in rows if v == "SPINE")
         assert declined > 2 * taken
+
+    def test_walking_past_a_word_does_not_burn_it(self):
+        """README rule 4 once claimed the opposite. Cage refutes it ten times."""
+        import trace as cage_trace
+        rows, _ = cage_trace.walk(200)
+        seen, reused = {}, []
+        for letter, _, word, verdict, _ in rows:
+            if verdict == "DECLINED":
+                seen.setdefault(letter, set()).add(cage.bare(word))
+            elif verdict == "SPINE" and cage.bare(word) in seen.get(letter, ()):
+                reused.append((letter, cage.bare(word)))
+        assert len(reused) == 10
+        assert ("R", "from") in reused

@@ -34,10 +34,10 @@ Through analysis of Cage's output compared to source text, we've identified thes
    - Cannot reuse that syllable for the same letter later
    - Example: "thEn" indexes syllable "then" to E; can't use "then" again for E
 
-4. **Words containing spine letters**: Any word containing a letter from the spine word "presents" that letter
-   - Words with spine letters must be used in proper sequence (or skipped)
-   - Cannot use a word that would present a letter out of order
-   - Example: Skip "down" (contains D) while seeking Z, because using it would burn the syllable "down" for D
+4. **Walking past a word costs nothing** (corrected): a word carrying the letter being sought may be passed over and used later for that same letter
+   - An earlier version of this list claimed the opposite, that passing over a word burnt its syllable
+   - Cage's own text refutes it 10 times: `from` and `over` present R, `ship` and `pay` present P, after he had walked past them while seeking those letters
+   - The index records what was _used_ to present a letter, not what was _seen_
 
 5. **Neutral words**: Words containing NO letters from the spine word can appear as wing words without constraint
 
