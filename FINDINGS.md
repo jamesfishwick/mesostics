@@ -2,6 +2,40 @@
 
 Notes from comparing this implementation against _Writing Through the Cantos_ (_X: Writings '79-'82_, pp. 109-116). Every number here comes from `just analyse`, which reads Cage's own text rather than anybody's recollection of it.
 
+## The rule set
+
+Seven rules. Five are certain, one is a fitted model, one is unsolved.
+
+| # | rule                                                       | evidence                                                                                                                | standing         |
+| - | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| 1 | Read the source once, forward, never returning             | page references climb 2 to 781 with 2 backward steps in ~190; `narrow` comes from page 4 in a line otherwise on page 11 | certain          |
+| 2 | Spell EZRAPOUND down the page, four letters then five      | 106 EZRA lines, 92 POUND                                                                                                | certain          |
+| 3 | A word may present two letters at once                     | 3 occurrences, e.g. `sEa-jauZionda`                                                                                     | certain          |
+| 4 | Never present a letter with a syllable already spent on it | 884 presentations, zero reuse                                                                                           | certain          |
+| 5 | Between two spine letters, print no word carrying either   | 476 of 479 printed wing words                                                                                           | certain, 3 slips |
+| 6 | Recase, so the mark is the only capital                    | `And`→`and`, `Pluto`→`plUto`                                                                                            | certain          |
+| 7 | Of the words that could present a letter, take one         | see below                                                                                                               | **modelled**     |
+
+### Rule 7, the spine word
+
+Drawn afresh at every letter: three times in four he takes a candidate at 0.60, otherwise at 0.23. A single rate is rejected at p=0.0002; two components fit at chi-square 6.6 on 5. The draw does not persist, so it is a procedure and not a temperament.
+
+Eight word features were tested against the 678 candidates he declined and the 319 he took. None separates them. Two weak tendencies survive and neither is a rule: he takes the first admissible word 53% of the time, and he leans away from words Pound capitalised, which he nonetheless takes 83 times out of 319.
+
+### The wings, unsolved
+
+Rule 5 says what he may print. Nothing yet says what he does print.
+
+|                          |                                               |
+| ------------------------ | --------------------------------------------- |
+| allowed wing words       | 15,189                                        |
+| printed                  | 224, or 1.5%                                  |
+| spans receiving any wing | 49 of 284                                     |
+| words per decorated span | about 4.6, almost all isolated singletons     |
+| position within the span | mildly U-shaped, 53/40/34/37/50 across fifths |
+
+There is structure here and it is not a rule yet. Adjacency to the spine word was tested and fails: flush after the previous spine word 9% of the time, flush before the next 9%, neither 82%.
+
 ## What Cage did
 
 Stated as a procedure, with every step backed by a measurement over his own text. Where he made a choice the rule does not force, the step says so rather than inventing a reason.
