@@ -148,7 +148,7 @@ class TestAnalysis:
     def test_he_takes_the_first_admissible_word_just_over_half_the_time(self):
         import analysis
         compared, agreed, unalignable = analysis.agreement()
-        assert (compared, agreed, unalignable) == (313, 164, 8)
+        assert (compared, agreed, unalignable) == (307, 163, 8)
 
     @pytest.mark.parametrize("lines", [2, 4, 16, 30])
     def test_the_trace_accounts_for_every_word(self, lines):

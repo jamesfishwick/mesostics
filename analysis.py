@@ -193,20 +193,26 @@ def agreement(words=None, target=None):
     index, cursor = {}, 0
     agreed = compared = unalignable = 0
 
+    poisoned = False
     for letter, wanted in target:
         his = next((i for i in range(cursor, len(words))
                     if cage.bare(words[i]) == wanted and letter in words[i].upper()), None)
         if his is None:
-            unalignable += 1          # absent from the scan, or an OCR variant
+            # The scan lost his word, so the cursor cannot advance past it and
+            # the next comparison would be measured from too far back. Both
+            # this choice and the next one are unusable.
+            unalignable += 1
+            poisoned = True
             continue
         admissible = [
             i for i in range(cursor, his + 1)
             if letter in words[i].upper()
             and extract_syllable_with_letter(words[i], letter) not in index.get(letter, [])
         ]
-        if admissible:
+        if admissible and not poisoned:
             compared += 1
             agreed += admissible[0] == his
+        poisoned = False
         index.setdefault(letter, []).append(extract_syllable_with_letter(words[his], letter))
         cursor = his + 1
     return compared, agreed, unalignable

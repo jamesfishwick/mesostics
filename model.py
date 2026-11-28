@@ -44,8 +44,8 @@ SPINE = "EZRAPOUND"
 # Two states, fitted to his rank distribution. Reading through, he takes the
 # first thing that works; choosing, he walks past five or six.
 READING = 0.60
-CHOOSING = 0.17
-P_READING = 0.80
+CHOOSING = 0.23
+P_READING = 0.75
 
 
 def walk_spine(words, letters=319, seed=None):
@@ -78,19 +78,25 @@ def cage_ranks(words=None):
     """Where Cage's own choice sat among the words available to him."""
     words = analysis.corpus_words(analysis.PP3_152) if words is None else words
     index, cursor, ranks = {}, 0, []
+    poisoned = False
     for letter, wanted in analysis.cage_choices():
         his = next((i for i in range(cursor, len(words))
                     if cage.bare(words[i]) == wanted
                     and letter in words[i].upper()), None)
         if his is None:
+            # The scan lost this word. The cursor stays put, so the next rank
+            # would be counted from hundreds of words too early: one lost word
+            # once produced an apparent reach of 175. Discard the next one.
+            poisoned = True
             continue
         available = [
             i for i in range(cursor, his + 1)
             if letter in words[i].upper()
             and extract_syllable_with_letter(words[i], letter) not in index.get(letter, [])
         ]
-        if his in available:
+        if his in available and not poisoned:
             ranks.append(available.index(his) + 1)
+        poisoned = False
         index.setdefault(letter, []).append(
             extract_syllable_with_letter(words[his], letter))
         cursor = his + 1

@@ -56,28 +56,36 @@ Five of those steps were read off his text and are deterministic. Step 3 is the 
 
 ### Why two states and not one
 
-A single rate, fitted at his own first-match frequency, is destroyed by the tail:
-
-|                  | chi-square | df | rank 12 or deeper |
-| ---------------- | ---------- | -- | ----------------- |
-| Cage             |            |    | **8 of 310**      |
-| one rate at 0.53 | **108.7**  | 5  | 0.1               |
-| two states       | **13.2**   | 6  | **8.0**           |
-
-Run forty times against the same corpus, the two-state rule reproduces his whole distribution:
+A single rate is destroyed by the tail. Fitted to his cleaned rank distribution it scores chi-square 26.1 on 6 degrees of freedom, p=0.0002. Two states score 6.6 on 5.
 
 | rank              | the rule | Cage  |
 | ----------------- | -------- | ----- |
-| first             | 51.9%    | 52.9% |
-| second            | 21.6%    | 19.4% |
-| third             | 10.0%    | 12.6% |
-| fourth            | 5.0%     | 4.8%  |
-| seventh           | 1.2%     | 1.3%  |
-| twelfth or deeper | 2.5%     | 2.6%  |
+| first             | 51.1%    | 53.6% |
+| second            | 21.9%    | 19.1% |
+| third             | 10.5%    | 12.8% |
+| fourth            | 5.7%     | 4.9%  |
+| seventh           | 1.3%     | 1.3%  |
+| twelfth or deeper | 1.5%     | 1.6%  |
 
-The eighteen deep reaches are not anomalies and not mistakes. They are the tail of the second state. Three structural explanations for them had been tested and had all failed, which is what that looks like when the thing being explained is a mode rather than an event.
+The deep reaches are the tail of the second state. They are not a lapse either: a lapse clusters, and these spread 2, 6, 5 and 5 across the quarters of the piece against 4.5 expected.
 
-They are also not a lapse. A lapse clusters, and these are spread evenly: 2, 6, 5 and 5 across the four quarters of the piece against 4.5 expected, with gaps between them averaging 13.9 where random would give 17.2.
+### A lost word once manufactured an outlier
+
+The deepest reach in this piece appeared to be 175: he seemed to walk past 174 usable R words to take `mother`. He did not.
+
+`sEa-jauZionda` presents both E and Z and the scan lost it. The walk could not place the word, so the cursor never advanced past it, and R was then counted from hundreds of words earlier than where he actually stood. One missing word invented 174 declines.
+
+Ranks measured straight after a lost word are now discarded, six of them. The effect on the figures:
+
+|                   | before | after     |
+| ----------------- | ------ | --------- |
+| deepest reach     | 175    | **62**    |
+| rank 12 or deeper | 2.6%   | **1.6%**  |
+| first-match rate  | 52.9%  | **53.6%** |
+
+The two-state conclusion survives: one rate is still rejected at p=0.0002. The parameters moved, from 80% at 0.60 and 20% at 0.17 to 75% at 0.60 and 25% at 0.23.
+
+The lesson is narrower than the fix. A gap in the evidence does not stay where the gap is: because this walk is sequential, a word lost in one place corrupts the measurement in the next, and the corruption looks like a finding.
 
 ### What the rule does and does not say
 
@@ -150,7 +158,7 @@ The word-level result above, that Cage never reused a word to present a letter, 
 
 198 mesostic lines, 106 spelling EZRA and 92 spelling POUND, carrying 884 spine presentations between them. Each pair of lines carries a margin reference to the page of _The Cantos_ it was drawn from, and those references run from 3 to 782.
 
-`corpus/cantos_pp3-152.txt` carries printed pages 3 to 152 of the New Directions edition, Cantos I to XXX, 28,387 words. Those cantos were published in 1925 and 1930 and are out of US copyright. They cover 313 of Cage's 884 spine choices, up from the 18 that Canto I alone could reach. The rest of the evidence is structural: what his choices have in common, not what we could have chosen instead.
+`corpus/cantos_pp3-152.txt` carries printed pages 3 to 152 of the New Directions edition, Cantos I to XXX, 28,387 words. Those cantos were published in 1925 and 1930 and are out of US copyright. They cover 307 of Cage's 884 spine choices, up from the 18 that Canto I alone could reach. The rest of the evidence is structural: what his choices have in common, not what we could have chosen instead.
 
 **He read the source continuously.** The margin reference marks where a pair _ends_, not a window he jumped to. His third line opens `thE narrow glaZes the uptuRned nipple As`, and `narrow` is not on page 11 at all: it is Canto I's "Unsheathed the narrow sword", back on page 4. The rest of that line is page 11. So he carried straight on from where the previous pair stopped.
 
@@ -221,11 +229,11 @@ Over the full Cantos I-XXX corpus, with the cursor anchored to his position at e
 
 |                                                    |               |
 | -------------------------------------------------- | ------------- |
-| choices compared                                   | **313**       |
-| where we would pick his word                       | **164 (52%)** |
+| choices compared                                   | **307**       |
+| where we would pick his word                       | **163 (53%)** |
 | not alignable (absent from the scan, OCR variants) | 8             |
 
-The eighteen-letter sample said 61%. At 313 it is 52%, so the small sample was mildly optimistic but not misleading. He takes the first admissible word slightly more often than not, and the implementation is far closer to him than a naive end-to-end score suggests.
+The eighteen-letter sample said 61%. At 307 it is 53%, so the small sample was mildly optimistic but not misleading. He takes the first admissible word slightly more often than not, and the implementation is far closer to him than a naive end-to-end score suggests.
 
 ### The seven deviations
 
