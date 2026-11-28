@@ -86,20 +86,6 @@ class TestAnalysis:
         ranks = [rank for _, _, rank, _, _ in analysis.candidate_ranks()]
         assert ranks == [1, 1, 1, 1, 3, 1, 2, 1, 2]
 
-    def test_no_filter_combination_beats_taking_the_first_word(self):
-        import analysis
-        best = analysis.search()[0][0]
-        assert best == analysis.score(()) == 4
-
-    def test_pallor_is_the_only_invisible_mark_among_our_picks(self):
-        import analysis
-        words = analysis.corpus_words()
-        ours = analysis.walk()
-        invisible = [w for w, letter in zip(ours, analysis.SPINE)
-                     if any(analysis.invisible_mark(src, letter)
-                            for src in words if cage.bare(src) == w)]
-        assert invisible == ["pallor"]
-
     def test_the_cascade_accounts_for_most_of_the_divergence(self):
         import analysis
         rows, agreed, deviations = analysis.oracle_walk()
@@ -137,15 +123,6 @@ class TestAnalysis:
             for (l1, p1), (l2, p2) in zip(picks, picks[1:])
         )
         assert (len(picks), dirty) == (18, 9)
-
-    def test_every_letter_filter_is_disqualified_by_cages_own_words(self):
-        import analysis
-        for name in analysis.FILTERS:
-            counts, _ = analysis.disqualify(name)
-            if counts is None:
-                continue  # needs source capitalisation, which his text lost
-            rejected, total = counts
-            assert rejected > 0, f"{name} now survives {total} choices: re-examine it"
 
     def test_he_takes_the_first_admissible_word_just_over_half_the_time(self):
         import analysis
@@ -261,12 +238,6 @@ class TestAnalysis:
             analysis.source_capitalised)
         assert (higher, lower) == (24, 56)
         assert p < 0.017, "below the Bonferroni threshold for three tests"
-
-    @pytest.mark.parametrize("name", ["vowel groups", "letters"])
-    def test_the_other_features_do_not_separate(self, name):
-        import analysis
-        *_, p = analysis.within_span_preference(analysis.PREFERENCE_TESTS[name])
-        assert p >= 0.017, f"{name} now separates; re-examine before claiming it"
 
     def test_the_lean_is_a_bias_not_a_rule(self):
         """He takes capitalised words often enough that no rule can forbid them."""

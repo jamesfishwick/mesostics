@@ -139,33 +139,6 @@ def compare(runs=40):
             for rank in range(1, 8)}
 
 
-def deep_reaches(threshold=7, words=None):
-    """The places Cage walked past far more candidates than the rate predicts.
-
-    These are the residue. Everything else about his selection is the rate.
-    """
-    words = analysis.corpus_words(analysis.PP3_152) if words is None else words
-    index, cursor, out = {}, 0, []
-    for letter, wanted in analysis.cage_choices():
-        his = next((i for i in range(cursor, len(words))
-                    if cage.bare(words[i]) == wanted
-                    and letter in words[i].upper()), None)
-        if his is None:
-            continue
-        available = [
-            i for i in range(cursor, his + 1)
-            if letter in words[i].upper()
-            and extract_syllable_with_letter(words[i], letter) not in index.get(letter, [])
-        ]
-        if his in available and available.index(his) + 1 >= threshold:
-            out.append((letter, words[his], available.index(his) + 1,
-                        [cage.bare(words[i]) for i in available[:available.index(his)]]))
-        index.setdefault(letter, []).append(
-            extract_syllable_with_letter(words[his], letter))
-        cursor = his + 1
-    return out
-
-
 def wing_fit():
     """What the wings look like, measured the same way as the spine.
 
@@ -243,13 +216,6 @@ def report():
           f"max {max(counts)}")
     print(f"  in the last fifth of its span  {100 * end_heavy:.0f}% "
           f"against 20% if placed uniformly")
-
-    deep = deep_reaches()
-    print(f"\nTHE RESIDUE: {len(deep)} places he reached rank 7 or beyond\n")
-    for letter, word, rank, passed in deep:
-        print(f"  {letter}  took {word!r} at rank {rank}, "
-              f"past {', '.join(passed[:6])}{' ...' if len(passed) > 6 else ''}")
-
 
 if __name__ == "__main__":
     report()
