@@ -30,7 +30,7 @@ The parser leaves all three joined. Splitting them sends the alignment hunting f
 
 ## The rule set
 
-Seven rules. Five are certain, one is a fitted model, one is unsolved.
+Seven rules. Five are certain, two are fitted models.
 
 | # | rule                                                       | evidence                                                                                                                | standing         |
 | - | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------- |
@@ -48,19 +48,23 @@ Drawn afresh at every letter: three times in four he takes a candidate at 0.60, 
 
 Eight word features were tested against the 678 candidates he declined and the 319 he took. None separates them. Two weak tendencies survive and neither is a rule: he takes the first admissible word 53% of the time, and he leans away from words Pound capitalised, which he nonetheless takes 83 times out of 319.
 
-### The wings, unsolved
+### The wings, same signature
 
-Rule 5 says what he may print. Nothing yet says what he does print.
+Rule 5 says what he may print. What he does print turns out to be built the same way as rule 7.
 
-|                          |                                               |
-| ------------------------ | --------------------------------------------- |
-| allowed wing words       | 15,189                                        |
-| printed                  | 224, or 1.5%                                  |
-| spans receiving any wing | 49 of 284                                     |
-| words per decorated span | about 4.6, almost all isolated singletons     |
-| position within the span | mildly U-shaped, 53/40/34/37/50 across fifths |
+|                          |                             |
+| ------------------------ | --------------------------- |
+| allowed wing words       | 15,189                      |
+| printed                  | 224, or 1.5%                |
+| spans receiving any wing | 50 of 287, about one in six |
 
-There is structure here and it is not a rule yet. Adjacency to the spine word was tested and fails: flush after the previous spine word 9% of the time, flush before the next 9%, neither 82%.
+**Whether a span gets decorated is drawn per span.** A runs test on the sequence of decorated and bare spans puts the observed alternation at z=-1.15, within noise of independence, so it does not carry over from one span to the next any more than his selectiveness carries from one letter to the next.
+
+**How many words go in is a two-component draw.** One rate is rejected at chi-square 12.5 on 3 degrees of freedom; two fit at 1.5 on 1, at 55% brief against 45% long. Median two words, mean 4.5, longest 26.
+
+**Where they sit is not uniform.** The last fifth of a span holds 62 of 217 printed words against 43 expected, chi-square 13.2 on 4, p=0.011. He favours the words just before the next spine word, and mildly those just after the previous one.
+
+A caution on all three. They rest on 50 decorated spans, where the spine figures rest on 315 choices. Three parameters fitted to 50 observations is thin, and these should be read as the shape of the thing rather than its measurement. Adjacency was tested separately and fails: flush after the previous spine word 9% of the time, flush before the next 9%, neither 82%. The end-of-span preference is a lean, not a rule about adjacency.
 
 ## What Cage did
 

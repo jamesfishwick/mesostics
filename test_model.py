@@ -123,3 +123,47 @@ def test_selectiveness_does_not_carry_over():
     for threshold in (2, 3, 4, 5, 7):
         _, _, z = model.independence(threshold)
         assert abs(z) < 2, f"rank>={threshold} clusters at z={z:+.2f}; it is a mode after all"
+
+
+class TestWings:
+    """The wings, measured the same way as the spine and on far less data."""
+
+    def test_decorating_a_span_is_decided_per_span(self):
+        """A mood would persist across neighbouring spans. This does not."""
+        import random
+        import statistics
+        import trace as cage_trace
+        rows, _ = cage_trace.walk(200)
+        seq, current = [], []
+        for _, _, _, verdict, _ in rows:
+            if verdict in (cage_trace.PASSED, cage_trace.PRINTED, cage_trace.TIED):
+                current.append(verdict != cage_trace.PASSED)
+            elif verdict in (cage_trace.SPINE_MARK, cage_trace.MISSING):
+                if current:
+                    seq.append(1 if any(current) else 0)
+                current = []
+        count = lambda s: 1 + sum(1 for a, b in zip(s, s[1:]) if a != b)
+        observed = count(seq)
+        rng = random.Random(0)
+        sampled = []
+        for _ in range(4000):
+            shuffled = seq[:]
+            rng.shuffle(shuffled)
+            sampled.append(count(shuffled))
+        mean = statistics.mean(sampled)
+        sd = statistics.pstdev(sampled)
+        assert abs((observed - mean) / sd) < 2, "span decoration clusters after all"
+
+    def test_he_decorates_about_one_span_in_six(self):
+        spans, decorated, _, _ = model.wing_fit()
+        assert (spans, decorated) == (287, 50)
+
+    def test_printed_words_favour_the_end_of_their_span(self):
+        """Not uniform: the last fifth is over-represented."""
+        *_, end_heavy = model.wing_fit()
+        assert end_heavy > 0.25, "the end-of-span preference has gone"
+
+    def test_most_decorated_spans_get_one_or_two_words(self):
+        *_, counts, _ = model.wing_fit()
+        brief = sum(1 for c in counts if c <= 2)
+        assert brief / len(counts) > 0.55

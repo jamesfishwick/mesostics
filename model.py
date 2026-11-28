@@ -13,8 +13,11 @@ rate rather than a reason:
        CHOOSING, walking past five or six. The draw does not persist. It is
        not a mood he settles into for a stretch; each letter gets its own.
     4. Record its syllable; never present that letter with it again.
-    5. Between two spine words, print some subsequence of the words carrying
-       neither letter.
+    5. Between two spine words, decide whether to print anything at all,
+       which happens for about one span in six and is decided afresh each
+       time. If so, draw how many words to print the same way selectiveness
+       is drawn, mostly one and occasionally many. Favour the words nearest
+       the spine words, most of all those just before the next one.
     6. Recase so the mark is the only capital.
 
 Step 3 is the finding. Eight word features were tested against the 678
@@ -55,6 +58,18 @@ SPINE = "EZRAPOUND"
 READING = 0.60
 CHOOSING = 0.23
 P_READING = 0.75
+
+# The wings, fitted the same way and on far less data: 50 decorated spans.
+# Whether a span is decorated at all is drawn per span, and a runs test puts
+# that within noise of independence at z=-1.15. How many words go in is a
+# two-component draw like the spine's, one rate fitting at chi-square 12.5 on
+# 3 degrees of freedom against 1.5 on 1. Where they sit is not uniform: the
+# last fifth of a span holds 62 of 217 against 43 expected, chi-square 13.2 on
+# 4, p=0.011.
+P_DECORATE = 0.17
+WING_BRIEF = 0.85
+WING_LONG = 0.07
+P_WING_BRIEF = 0.55
 
 
 def walk_spine(words, letters=319, seed=None):
@@ -151,6 +166,32 @@ def deep_reaches(threshold=7, words=None):
     return out
 
 
+def wing_fit():
+    """What the wings look like, measured the same way as the spine.
+
+    Returns (spans, decorated, counts, end_heavy) where counts is the number
+    of words printed in each decorated span and end_heavy is the share of
+    printed words falling in the last fifth of their span against 0.20 if
+    they were placed uniformly.
+    """
+    import trace as cage_trace
+
+    rows, _ = cage_trace.walk(200)
+    spans, current = [], []
+    for _, _, _, verdict, _ in rows:
+        if verdict in (cage_trace.PASSED, cage_trace.PRINTED, cage_trace.TIED):
+            current.append(verdict != cage_trace.PASSED)
+        elif verdict in (cage_trace.SPINE_MARK, cage_trace.MISSING):
+            if current:
+                spans.append(current)
+            current = []
+    counts = [sum(s) for s in spans if any(s)]
+    places = [i / (len(s) - 1) for s in spans if len(s) > 1
+              for i, printed in enumerate(s) if printed]
+    end_heavy = sum(1 for x in places if x >= 0.8) / len(places) if places else 0
+    return len(spans), len(counts), counts, end_heavy
+
+
 def independence(threshold=3, trials=8000, seed=0):
     """Does his selectiveness carry over from one letter to the next?
 
@@ -192,6 +233,16 @@ def report():
               f"if independent {expected:5.1f}   z={z:+.2f}")
     print("  -> within noise at every threshold: drawn afresh each letter,"
           "\n     which is a chance operation rather than a temperament")
+
+    spans, decorated, counts, end_heavy = wing_fit()
+    print("\nTHE WINGS\n")
+    print(f"  spans                     {spans}, decorated {decorated} "
+          f"({100 * decorated / spans:.0f}%)")
+    print(f"  words per decorated span  median "
+          f"{sorted(counts)[len(counts)//2]}, mean {sum(counts)/len(counts):.1f}, "
+          f"max {max(counts)}")
+    print(f"  in the last fifth of its span  {100 * end_heavy:.0f}% "
+          f"against 20% if placed uniformly")
 
     deep = deep_reaches()
     print(f"\nTHE RESIDUE: {len(deep)} places he reached rank 7 or beyond\n")
