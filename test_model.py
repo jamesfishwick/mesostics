@@ -23,10 +23,32 @@ def test_the_rule_matches_the_near_ranks(rows, rank):
     assert abs(simulated - his) < 6, f"rank {rank}: {simulated:.1f} vs {his:.1f}"
 
 
-def test_the_rule_undershoots_his_tail(rows):
-    """The one place it fails, and the only part of selection unaccounted for."""
-    simulated, his = rows[7]
-    assert his > simulated, "if this ever reverses, the residue is gone"
+def test_the_rule_reproduces_his_tail(rows):
+    """A single rate predicts 0.03% here against his 2.6%. Two states do not."""
+    import collections
+
+    import analysis
+    words = analysis.corpus_words(analysis.PP3_152)
+    simulated = collections.Counter()
+    for seed in range(60):
+        simulated.update(model.walk_spine(words, seed=seed))
+    total = sum(simulated.values())
+    deep = sum(v for k, v in simulated.items() if k >= 12) / total
+    his = collections.Counter(model.cage_ranks())
+    his_deep = sum(v for k, v in his.items() if k >= 12) / sum(his.values())
+    assert abs(deep - his_deep) < 0.015, f"{deep:.3f} vs {his_deep:.3f}"
+
+
+def test_one_rate_cannot_do_it(rows):
+    """Kept as the reason the model has two states and not one."""
+    n = len(model.cage_ranks())
+    single = sum(n * 0.529 * (1 - 0.529) ** (r - 1) for r in range(12, 300))
+    assert single < 1, "a single rate puts almost nothing past rank 12"
+
+
+def test_the_states_are_distinct():
+    """If these converge the two-state story collapses into one rate."""
+    assert model.READING > 3 * model.CHOOSING
 
 
 def test_the_residue_is_small_and_named():
@@ -39,7 +61,7 @@ def test_the_residue_is_small_and_named():
 def test_his_rate_is_what_the_model_uses():
     ranks = model.cage_ranks()
     first = collections.Counter(ranks)[1] / len(ranks)
-    assert abs(first - model.ACCEPT) < 0.01
+    assert abs(first - 0.529) < 0.01
 
 
 class TestResidueHypotheses:
@@ -78,5 +100,5 @@ class TestResidueHypotheses:
         """18 observed against about 3.4 expected is far outside chance."""
         ranks = model.cage_ranks()
         deep = sum(1 for r in ranks if r >= 7)
-        expected = len(ranks) * (1 - model.ACCEPT) ** 6
+        expected = len(ranks) * (1 - 0.529) ** 6
         assert deep > 4 * expected

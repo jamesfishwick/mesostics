@@ -42,50 +42,48 @@ Two are the word `in`; the third is a word already printed once on its own line.
 1. Read the source once, forward. Never go back.
 2. Spell EZRAPOUND down the page, four letters then five.
 3. For each letter, walk forward through the words carrying it whose
-   syllable has not already been spent on that letter. Take each with
-   probability 0.53. Otherwise keep walking.
+   syllable has not already been spent, and take one. He does this in
+   two states: four times in five he is reading through and takes a
+   candidate at 0.60; the fifth time he is choosing and takes one at
+   0.17, walking past five or six on average.
 4. Record its syllable; never present that letter with it again.
 5. Between two spine words, print some subsequence of the words
    carrying neither letter.
 6. Recase so the mark is the only capital.
 ```
 
-Five of those steps were read off his text and are deterministic. Step 3 is the finding of this project, and it is a rate rather than a reason. Running it forty times against the same corpus:
+Five of those steps were read off his text and are deterministic. Step 3 is the finding of this project.
 
-| rank of the word taken | the rule | Cage  |
-| ---------------------- | -------- | ----- |
-| first                  | 54.0%    | 52.9% |
-| second                 | 24.0%    | 19.4% |
-| third                  | 11.6%    | 12.6% |
-| fourth                 | 5.5%     | 4.8%  |
-| fifth                  | 2.6%     | 1.9%  |
-| seventh or later       | 1.1%     | 5.8%  |
+### Why two states and not one
 
-This is why eight word features found nothing separating the 678 candidates he declined from the 319 he took. A memoryless process leaves no trace in the words, so there was never anything of that kind to find. Asking why he took one word rather than another is asking which atom decays next: the rate is the answer, and it is an answer about the distribution and never about the instance.
+A single rate, fitted at his own first-match frequency, is destroyed by the tail:
 
-`just model` re-derives the comparison.
+|                  | chi-square | df | rank 12 or deeper |
+| ---------------- | ---------- | -- | ----------------- |
+| Cage             |            |    | **8 of 310**      |
+| one rate at 0.53 | **108.7**  | 5  | 0.1               |
+| two states       | **13.2**   | 6  | **8.0**           |
 
-### The residue
+Run forty times against the same corpus, the two-state rule reproduces his whole distribution:
 
-The rule fails in one place. He reaches rank seven or beyond at 5.8% where the rate predicts 1.1%, about eighteen occasions. Some of that is an artifact of counting every occurrence of a repeated word as a fresh candidate, since he walks past `bezants` three times running; counting distinct syllables instead brings it to 4.5%, closer and still not the rate.
+| rank              | the rule | Cage  |
+| ----------------- | -------- | ----- |
+| first             | 51.9%    | 52.9% |
+| second            | 21.6%    | 19.4% |
+| third             | 10.0%    | 12.6% |
+| fourth            | 5.0%     | 4.8%  |
+| seventh           | 1.2%     | 1.3%  |
+| twelfth or deeper | 2.5%     | 2.6%  |
 
-| letter | took        | at rank | having walked past                               |
-| ------ | ----------- | ------- | ------------------------------------------------ |
-| R      | `mother`    | 175     | from, grey, water, familiar, hard, parting ...   |
-| P      | `operated,` | 62      | paper, plures, keep, paolo, keep, sparta ...     |
-| E      | `blue`      | 37      | bluepale, smoke, incense, rise, aeolus, over ... |
+The eighteen deep reaches are not anomalies and not mistakes. They are the tail of the second state. Three structural explanations for them had been tested and had all failed, which is what that looks like when the thing being explained is a mode rather than an event.
 
-Those eighteen are the only part of his selection still unaccounted for. Everything else is the rate.
+They are also not a lapse. A lapse clusters, and these are spread evenly: 2, 6, 5 and 5 across the four quarters of the piece against 4.5 expected, with gaps between them averaging 13.9 where random would give 17.2.
 
-Three structural explanations for them have been tested and none holds:
+### What the rule does and does not say
 
-| hypothesis                                                          | result                                                                                                         |
-| ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| he was moving to a new page of the source                           | deep reaches sit at a page change 11% of the time against a 7% base rate                                       |
-| the candidates were clustered, so rank overstates how far he walked | no: he walks 91 words at the median against 7 for the rest                                                     |
-| he skipped pages, so our count includes words he never read         | no: his page jumps are smaller at deep reaches, and the largest jump in the piece, 59 pages, lands on a rank 1 |
+It explains the distribution and never the instance. Asking why he took one word rather than another is asking which atom decays next. Asking why he was choosing rather than reading at that moment is the same question one level up.
 
-The excess is real rather than noise: 18 observed against 3.4 expected over 310 choices. A heavier-tailed distribution would fit the curve, and fitting a curve is not an explanation. Whatever was happening on those eighteen occasions is not in the text, the page references, or the shape of the candidate list.
+`just model` re-derives all of it.
 
 ## What can be said about his choosing
 

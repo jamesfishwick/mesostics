@@ -7,8 +7,10 @@ rate rather than a reason:
     1. Read the source once, forward. Never go back.
     2. Spell EZRAPOUND down the page, four letters then five.
     3. For each letter, walk forward through the words carrying it whose
-       syllable has not already been spent on that letter. Take each with
-       probability ACCEPT. Otherwise keep walking.
+       syllable has not already been spent on that letter, and take one.
+       He does this in two states. Four times in five he is reading through
+       and takes a candidate at READING. The fifth time he is choosing, and
+       takes one at CHOOSING, walking past five or six on average.
     4. Record its syllable; never present that letter with it again.
     5. Between two spine words, print some subsequence of the words carrying
        neither letter.
@@ -16,17 +18,18 @@ rate rather than a reason:
 
 Step 3 is the finding. Eight word features were tested against the 678
 candidates Cage declined and none separates them from the 319 he took, which
-is what a memoryless process looks like from outside. ACCEPT is his own
-first-match rate, and the model reproduces his rank distribution through rank
-six. It does not reproduce his tail: he reaches rank seven or beyond at 5.8%
-where the rate predicts 1.1%, and those occasions are the only part of his
-selection still unaccounted for. Some of that gap is an artifact of counting
-every occurrence of a repeated word as a fresh candidate, since he walks past
-"bezants" three times running; counting distinct syllables instead brings it
-to 4.5%, which is closer and still not the rate.
+is what a process with no per-word reason looks like from outside.
 
-A rate explains a distribution and never an instance. Asking why he took one
-word rather than another is asking which atom decays next.
+A single rate will not do. Fitted at his own first-match frequency it is
+destroyed by the tail: he reaches rank twelve or deeper eight times where one
+rate predicts 0.1, chi-square 108.7 on 5 degrees of freedom. Two states fit,
+chi-square 13.2 on 6, and predict that tail at 8.0 against his 8.
+
+So the rule is that he works in two modes and the deep reaches are not
+anomalies but the tail of the second. A rate explains a distribution and
+never an instance: asking why he took one word rather than another is asking
+which atom decays next, and asking why he was choosing rather than reading at
+that moment is the same question one level up.
 """
 
 import collections
@@ -37,15 +40,22 @@ import cage
 from syllables import extract_syllable_with_letter
 
 SPINE = "EZRAPOUND"
-ACCEPT = 0.529  # his own rate of taking the first admissible word
+
+# Two states, fitted to his rank distribution. Reading through, he takes the
+# first thing that works; choosing, he walks past five or six.
+READING = 0.60
+CHOOSING = 0.17
+P_READING = 0.80
 
 
-def walk_spine(words, accept=ACCEPT, letters=319, seed=None):
+def walk_spine(words, letters=319, seed=None):
     """Run step 3 over a source text. Returns the rank of each word taken."""
     rng = random.Random(seed)
     index, cursor, ranks = {}, 0, []
     for n in range(letters):
         letter = SPINE[n % len(SPINE)]
+        # Which state is he in for this letter?
+        accept = READING if rng.random() < P_READING else CHOOSING
         rank = 0
         for i in range(cursor, len(words)):
             if letter not in words[i].upper():
@@ -129,7 +139,10 @@ def deep_reaches(threshold=7, words=None):
 def report():
     print("CAGE'S METHOD AS A RULE\n")
     print(__doc__.split("    1.")[1].split("Step 3 is the finding")[0].rstrip())
-    print(f"\n    ACCEPT = {ACCEPT}\n")
+    print(f"\n    reading through {100 * P_READING:.0f}% of the time, "
+          f"taking at {READING}")
+    print(f"    choosing        {100 * (1 - P_READING):.0f}% of the time, "
+          f"taking at {CHOOSING}\n")
     print("Running step 3 forty times against the same corpus:\n")
     print(f"  {'rank':<8}{'the rule':<14}{'Cage':<14}")
     rows = compare()
