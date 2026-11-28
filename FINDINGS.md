@@ -2,6 +2,22 @@
 
 Notes from comparing this implementation against _Writing Through the Cantos_ (_X: Writings '79-'82_, pp. 109-116). Every number here comes from `just analyse`, which reads Cage's own text rather than anybody's recollection of it.
 
+## Is this the text Cage read?
+
+It is his edition, and that was worth checking rather than assuming.
+
+`corpus/cantos_pp3-152.txt` comes from an Internet Archive scan of the New Directions _Cantos_, the edition his margin references point into. The mapping from his page numbers to the scan is a constant offset of 8, confirmed at printed pages 11, 179 and 328 by finding his own words there. It is not constant over the whole book: by printed page 472 the offset is 28, because the scan carries about twenty extra leaves. That drift begins well past 152 and does not touch this corpus.
+
+Accuracy over the stretch where a hand-typed text exists for comparison is **99.3%**.
+
+A second scan was tried and rejected. The Digital Library of India text reads 96.8% over the same stretch, is a different edition so the pagination would not map, and fails in exactly the places that break an alignment: `wind` as `wmd`, `slain` as `slam`, `in` as `m`.
+
+Cross-checking the two scans against each other finds 251 likely errors in theirs and about 30 in ours. Correcting ours changes nothing: the same 304 ranks, the same 53.6% first-match rate, the same 4.9% tail, to the last decimal. Several of the proposed corrections are wrong anyway, since `cether` is Pound's own spelling and the other scan truncates `Æneas` to `neas`.
+
+Two real defects were found and fixed: the drop capital at each canto opening had lost its small-capital tail, so `A ND then went down` had become `A then went down`, and the corpus ran nineteen words past `Explicit canto` into scan noise and a section divider. Neither moved a single published figure.
+
+**So corpus quality is not a limit on anything here.** Six of Cage's words remain unfindable, and those are damage in the OCR of _his_ book rather than of Pound's, so no Cantos scan can recover them.
+
 ## The rule set
 
 Seven rules. Five are certain, one is a fitted model, one is unsolved.
