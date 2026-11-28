@@ -116,3 +116,10 @@ class TestResidueHypotheses:
         deep = sum(1 for r in ranks if r >= 7)
         expected = len(ranks) * (1 - 0.529) ** 6
         assert deep > 4 * expected
+
+
+def test_selectiveness_does_not_carry_over():
+    """Two components are not two modes. A mode would persist; his does not."""
+    for threshold in (2, 3, 4, 5, 7):
+        _, _, z = model.independence(threshold)
+        assert abs(z) < 2, f"rank>={threshold} clusters at z={z:+.2f}; it is a mode after all"

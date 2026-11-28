@@ -8,9 +8,10 @@ rate rather than a reason:
     2. Spell EZRAPOUND down the page, four letters then five.
     3. For each letter, walk forward through the words carrying it whose
        syllable has not already been spent on that letter, and take one.
-       He does this in two states. Four times in five he is reading through
-       and takes a candidate at READING. The fifth time he is choosing, and
-       takes one at CHOOSING, walking past five or six on average.
+       How selective he is varies, and it is drawn afresh at every letter:
+       three times in four he takes a candidate at READING, otherwise at
+       CHOOSING, walking past five or six. The draw does not persist. It is
+       not a mood he settles into for a stretch; each letter gets its own.
     4. Record its syllable; never present that letter with it again.
     5. Between two spine words, print some subsequence of the words carrying
        neither letter.
@@ -20,16 +21,23 @@ Step 3 is the finding. Eight word features were tested against the 678
 candidates Cage declined and none separates them from the 319 he took, which
 is what a process with no per-word reason looks like from outside.
 
-A single rate will not do. Fitted at his own first-match frequency it is
-destroyed by the tail: he reaches rank twelve or deeper eight times where one
-rate predicts 0.1, chi-square 108.7 on 5 degrees of freedom. Two states fit,
-chi-square 13.2 on 6, and predict that tail at 8.0 against his 8.
+A single rate will not do. Fitted to his rank distribution it is destroyed by
+the tail, chi-square 26.1 on 6 degrees of freedom, p=0.0002. Two components
+fit at 6.6 on 5.
 
-So the rule is that he works in two modes and the deep reaches are not
-anomalies but the tail of the second. A rate explains a distribution and
-never an instance: asking why he took one word rather than another is asking
-which atom decays next, and asking why he was choosing rather than reading at
-that moment is the same question one level up.
+Two components are not two modes. A mode would persist, and his do not: a
+runs test on the sequence of choices puts the observed alternation within one
+standard deviation of independence at every threshold tried, z between -0.34
+and +1.15. Whatever sets his selectiveness is consulted once per letter and
+forgotten.
+
+That is the signature of a chance operation rather than a temperament, and
+chance operations were Cage's practice for thirty years before this piece.
+This measures the shape of the draw; it does not show which procedure he
+used, and nothing here could.
+
+A rate explains a distribution and never an instance. Asking why he took one
+word rather than another is asking which atom decays next.
 """
 
 import collections
@@ -41,8 +49,9 @@ from syllables import extract_syllable_with_letter
 
 SPINE = "EZRAPOUND"
 
-# Two states, fitted to his rank distribution. Reading through, he takes the
-# first thing that works; choosing, he walks past five or six.
+# How selective he is, drawn afresh at each letter rather than held for a
+# stretch. Reading through, he takes the first thing that works; choosing, he
+# walks past five or six.
 READING = 0.60
 CHOOSING = 0.23
 P_READING = 0.75
@@ -54,7 +63,7 @@ def walk_spine(words, letters=319, seed=None):
     index, cursor, ranks = {}, 0, []
     for n in range(letters):
         letter = SPINE[n % len(SPINE)]
-        # Which state is he in for this letter?
+        # Drawn per letter. The runs test says it does not carry over.
         accept = READING if rng.random() < P_READING else CHOOSING
         rank = 0
         for i in range(cursor, len(words)):
@@ -142,6 +151,27 @@ def deep_reaches(threshold=7, words=None):
     return out
 
 
+def independence(threshold=3, trials=8000, seed=0):
+    """Does his selectiveness carry over from one letter to the next?
+
+    A mode persists and shows fewer alternations than chance. A draw made
+    afresh each time shows the chance number. Returns (observed runs,
+    expected, z).
+    """
+    rng = random.Random(seed)
+    flags = [1 if r >= threshold else 0 for r in cage_ranks()]
+    count = lambda s: 1 + sum(1 for a, b in zip(s, s[1:]) if a != b)
+    observed = count(flags)
+    sampled = []
+    for _ in range(trials):
+        shuffled = flags[:]
+        rng.shuffle(shuffled)
+        sampled.append(count(shuffled))
+    mean = sum(sampled) / len(sampled)
+    sd = (sum((x - mean) ** 2 for x in sampled) / len(sampled)) ** 0.5
+    return observed, mean, (observed - mean) / sd if sd else 0.0
+
+
 def report():
     print("CAGE'S METHOD AS A RULE\n")
     print(__doc__.split("    1.")[1].split("Step 3 is the finding")[0].rstrip())
@@ -154,6 +184,14 @@ def report():
     rows = compare()
     for rank, (model, his) in rows.items():
         print(f"  {rank:<8}{model:<14.1f}{his:<14.1f}")
+
+    print("\nDOES HIS SELECTIVENESS CARRY OVER BETWEEN LETTERS?\n")
+    for threshold in (2, 3, 4, 5, 7):
+        observed, expected, z = independence(threshold)
+        print(f"  rank >= {threshold}   runs {observed:3d}   "
+              f"if independent {expected:5.1f}   z={z:+.2f}")
+    print("  -> within noise at every threshold: drawn afresh each letter,"
+          "\n     which is a chance operation rather than a temperament")
 
     deep = deep_reaches()
     print(f"\nTHE RESIDUE: {len(deep)} places he reached rank 7 or beyond\n")

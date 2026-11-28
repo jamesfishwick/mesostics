@@ -54,9 +54,9 @@ Two are the word `in`; the third is a word already printed once on its own line.
 
 Five of those steps were read off his text and are deterministic. Step 3 is the finding of this project.
 
-### Why two states and not one
+### Why two components, and why they are not two modes
 
-A single rate is destroyed by the tail. Fitted to his cleaned rank distribution it scores chi-square 26.1 on 6 degrees of freedom, p=0.0002. Two states score 6.6 on 5.
+A single rate is destroyed by the tail. Fitted to his rank distribution it scores chi-square 26.1 on 6 degrees of freedom, p=0.0002. Two components score 6.6 on 5.
 
 | rank              | the rule | Cage  |
 | ----------------- | -------- | ----- |
@@ -67,7 +67,19 @@ A single rate is destroyed by the tail. Fitted to his cleaned rank distribution 
 | seventh           | 1.3%     | 1.3%  |
 | twelfth or deeper | 1.5%     | 1.6%  |
 
-The deep reaches are the tail of the second state. They are not a lapse either: a lapse clusters, and these spread 2, 6, 5 and 5 across the quarters of the piece against 4.5 expected.
+Two components sound like two moods, one after the other. They are not. A mood would persist across neighbouring letters and show fewer alternations than chance. His shows the chance number exactly:
+
+| threshold | runs observed | if independent | z     |
+| --------- | ------------- | -------------- | ----- |
+| rank >= 2 | 162           | 152.1          | +1.14 |
+| rank >= 3 | 124           | 121.7          | +0.33 |
+| rank >= 4 | 81            | 76.3           | +1.08 |
+| rank >= 5 | 55            | 53.5           | +0.50 |
+| rank >= 7 | 29            | 29.5           | -0.32 |
+
+Whatever sets his selectiveness is consulted once per letter and forgotten. That is the signature of a chance operation rather than a temperament, and chance operations were Cage's practice for thirty years before this piece. This measures the shape of the draw. It does not show which procedure produced it, and nothing in the poem could.
+
+The deep reaches are therefore not a lapse and not a mood. They are the long end of a draw made afresh three hundred times.
 
 ### A lost word once manufactured an outlier
 
