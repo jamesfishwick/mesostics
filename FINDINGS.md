@@ -36,7 +36,48 @@ Step 6 holds in 476 of 479 printed wing words. The exceptions:
 
 Two are the word `in`; the third is a word already printed once on its own line. Small, repeated, easy to skim past when you are doing this by hand.
 
-### What can be said about his choosing
+### The method as a rule you can run
+
+```
+1. Read the source once, forward. Never go back.
+2. Spell EZRAPOUND down the page, four letters then five.
+3. For each letter, walk forward through the words carrying it whose
+   syllable has not already been spent on that letter. Take each with
+   probability 0.53. Otherwise keep walking.
+4. Record its syllable; never present that letter with it again.
+5. Between two spine words, print some subsequence of the words
+   carrying neither letter.
+6. Recase so the mark is the only capital.
+```
+
+Five of those steps were read off his text and are deterministic. Step 3 is the finding of this project, and it is a rate rather than a reason. Running it forty times against the same corpus:
+
+| rank of the word taken | the rule | Cage  |
+| ---------------------- | -------- | ----- |
+| first                  | 54.0%    | 52.9% |
+| second                 | 24.0%    | 19.4% |
+| third                  | 11.6%    | 12.6% |
+| fourth                 | 5.5%     | 4.8%  |
+| fifth                  | 2.6%     | 1.9%  |
+| seventh or later       | 1.1%     | 5.8%  |
+
+This is why eight word features found nothing separating the 678 candidates he declined from the 319 he took. A memoryless process leaves no trace in the words, so there was never anything of that kind to find. Asking why he took one word rather than another is asking which atom decays next: the rate is the answer, and it is an answer about the distribution and never about the instance.
+
+`just model` re-derives the comparison.
+
+### The residue
+
+The rule fails in one place. He reaches rank seven or beyond at 5.8% where the rate predicts 1.1%, about eighteen occasions. Some of that is an artifact of counting every occurrence of a repeated word as a fresh candidate, since he walks past `bezants` three times running; counting distinct syllables instead brings it to 4.5%, closer and still not the rate.
+
+| letter | took        | at rank | having walked past                               |
+| ------ | ----------- | ------- | ------------------------------------------------ |
+| R      | `mother`    | 175     | from, grey, water, familiar, hard, parting ...   |
+| P      | `operated,` | 62      | paper, plures, keep, paolo, keep, sparta ...     |
+| E      | `blue`      | 37      | bluepale, smoke, incense, rise, aeolus, over ... |
+
+Those eighteen are the only part of his selection still unaccounted for. Everything else is the rate.
+
+## What can be said about his choosing
 
 Two tendencies, measured over the 678 candidates he declined and the 319 he took.
 

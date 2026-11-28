@@ -25,3 +25,7 @@ analyse:
 # Word-by-word account of Cage's walk. Pass a line count, e.g. `just trace 4`.
 trace lines="4":
     uv run python trace.py {{lines}}
+
+# His method as a rule you can run, against what he actually did.
+model:
+    uv run python model.py
