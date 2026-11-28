@@ -16,7 +16,7 @@ Cross-checking the two scans against each other finds 251 likely errors in their
 
 Two real defects were found and fixed: the drop capital at each canto opening had lost its small-capital tail, so `A ND then went down` had become `A then went down`, and the corpus ran nineteen words past `Explicit canto` into scan noise and a section divider. Neither moved a single published figure.
 
-**So corpus quality is not a limit on anything here.** Six of Cage's words remain unfindable, and those are damage in the OCR of _his_ book rather than of Pound's, so no Cantos scan can recover them.
+**So corpus quality is not a limit on anything here.** Six of Cage's words remain unfindable, and the damage in those is mine rather than the Cantos scan's: it is in the text extracted from the PDF of _X: Writings '79-'82_, where `rotterdam` came out as `rotterdm`. Cage read a printed book. Both scans in this project are mine, one of his pages and one of Pound's, and a word lost in the first cannot be recovered from the second.
 
 ## The rule set
 
@@ -289,11 +289,11 @@ Correcting as we go separates the decisions Cage really made differently from th
 
 Over the full Cantos I-XXX corpus, with the cursor anchored to his position at every step so no disagreement can drag later letters with it:
 
-|                                                    |               |
-| -------------------------------------------------- | ------------- |
-| choices compared                                   | **307**       |
-| where we would pick his word                       | **163 (53%)** |
-| not alignable (absent from the scan, OCR variants) | 8             |
+|                                              |               |
+| -------------------------------------------- | ------------- |
+| choices compared                             | **307**       |
+| where we would pick his word                 | **163 (53%)** |
+| not alignable (lost in one of the two scans) | 8             |
 
 The eighteen-letter sample said 61%. At 307 it is 53%, so the small sample was mildly optimistic but not misleading. He takes the first admissible word slightly more often than not, and the implementation is far closer to him than a naive end-to-end score suggests.
 
@@ -351,7 +351,7 @@ Testing this properly needs more corpus. The margin references say exactly which
 | PASSED       | the rule allowed it as a wing and he did not print it                       | 6,612 |
 | PRINTED      | the rule allowed it as a wing and he printed it                             | 28    |
 | TIED         | the span holds several words spelt alike, one of which he printed           | 79    |
-| MISSING      | his word is not in the scan, an OCR variant                                 | 4     |
+| MISSING      | the word is lost in one of the two scans, so it cannot be placed            | 4     |
 
 **DECLINED is the column that matters.** It holds every word that could have presented the letter he was seeking, with a syllable he had not spent, and which he walked past anyway. 379 of them in thirty lines. His stated rules forbade none of them, and none was printed as a wing in its own span, which would have broken the between-letter prohibition.
 

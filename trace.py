@@ -92,7 +92,7 @@ def walk(limit_lines=4):
         if position is None:
             # His word is not in the scan. Say so; do not drop the row.
             out.append((letter, -1, wanted, MISSING,
-                        "not found in the scan, probably an OCR variant"))
+                        "lost in one of the two scans, so it cannot be placed"))
             continue
 
         forbidden = {previous, letter} - {None}

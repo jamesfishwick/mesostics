@@ -113,8 +113,9 @@ def extract_from_pdf(pdf_path):
         if not stripped.strip():
             continue
         # The margin reference is a page of The Cantos, set off by wide space.
-        # OCR turns some of them into letters, and inheriting the previous page
-        # would be worse than admitting we do not know.
+        # Reading it off the scan turns some into letters -- 11 comes through
+        # as n -- and inheriting the previous page would be worse than
+        # admitting we do not know.
         reference = re.search(r"\s{3,}(\S{1,7})\s*$", stripped)
         if reference:
             token = reference.group(1)
