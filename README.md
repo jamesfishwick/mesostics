@@ -108,29 +108,25 @@ WING_MODE = "SHOW_ALL"     # Wing word selection mode
 
 ### Wing Modes
 
-**SHOW_ALL** - Shows all valid options in brackets (within 45-char limit):
+Two, where there were five. `MINIMAL` and `RANDOM` guessed at Cage's sparseness and at the chance in his method, and measuring him replaced both; `MAX` was `SHOW_ALL` without the brackets, and `INTERACTIVE` was a stub that behaved as `MAX`.
+
+**CAGE** (the default) follows the procedure measured from his text. One span in six gets a wing at all, the count is mostly one or two words, and which word presents a letter is a draw rather than the first one that fits. Output over Canto I:
 
 ```
-And thEn [who | had | much; | Souls | with | girls | many, | with] bronZe [lance | heads, | Battle | spoil,] beaRing yet Arms, These
+wEnt bronZe; stRong, the nArrow
+UnwePt, “ElpenOr, oUtstripping ANd Down
+thE
 ```
 
-**MAX** - Include all valid words (within 45-char limit):
+Pass a seed for a different poem: `generate_mesostic(seed=5)`. The same seed always gives the same text.
+
+**SHOW_ALL** answers a different question, what the rule allowed, and prints the whole admissible set in brackets with the draw turned off. It is a diagnostic rather than a poem:
 
 ```
-And thEn who had much; Souls with girls many, with bronZe lance heads, Battle spoil, beaRing yet Arms, These
+[And] thEn [with] bronZe [lance | heads, | Battle | spoil,] beaRing [yet] Arms, [These]
 ```
 
-**MINIMAL** - Sparse, Cage-like output (1-2 words per wing):
-
-```
-And thEn bronZe heads, Battle beaRing Arms
-```
-
-**RANDOM** - Random selection (1-3 words per wing):
-
-```
-And thEn Souls bronZe spoil, beaRing yet Arms
-```
+Wing density is the check worth making: `CAGE` prints 0.25 wing words per spine word against Cage's own 0.22, where `SHOW_ALL` prints everything the rule permits.
 
 ## Output
 

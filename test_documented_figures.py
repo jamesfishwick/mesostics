@@ -114,14 +114,17 @@ class TestOutputFigures:
     @pytest.mark.parametrize("rule", ["100%", "50%", "0%"])
     def test_strictness_character_counts(self, rule):
         import mesostics
-        before = mesostics.MESOSTIC_RULE
+        before = mesostics.MESOSTIC_RULE, mesostics.WING_MODE
         try:
             mesostics.MESOSTIC_RULE = rule
+            # The strictness table is about what the prohibition admits, so it
+            # is measured with the draw off.
+            mesostics.WING_MODE = "SHOW_ALL"
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 size = sum(len(line) for line in mesostics.generate_mesostic())
         finally:
-            mesostics.MESOSTIC_RULE = before
+            mesostics.MESOSTIC_RULE, mesostics.WING_MODE = before
         assert_claimed(f"{size} characters", f"output size at {rule}", "README.md")
 
     def test_the_sample_output_is_the_real_output(self):

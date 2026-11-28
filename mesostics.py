@@ -30,8 +30,7 @@ target_name = "EZRAPOUND"
 # Configuration
 WING_CHAR_LIMIT = 45  # Maximum characters on each side of spine word
 MESOSTIC_RULE = "100%"  # "100%", "50%", or "0%" - see prohibited_letters
-WING_MODE = "SHOW_ALL"  # "SHOW_ALL", "MAX", "RANDOM", "MINIMAL", "INTERACTIVE"
-RANDOM_WORD_COUNT = (1, 3)  # (min, max) words for RANDOM mode
+WING_MODE = "CAGE"  # "CAGE" for what he did, "SHOW_ALL" to see what the rule allowed
 
 def prohibited_letters(other_letter, current_letter):
     """Letters a wing word may not contain, at the configured strictness.
@@ -89,62 +88,81 @@ def extract_consecutive_left_wing(word_history, exclude_letters, char_limit):
 
     return consecutive_chain
 
-def select_wing_words(candidates, mode):
-    """
-    Select which words to include in wing based on mode.
+def select_wing_words(candidates, mode, rng=None):
+    """Which of the admissible words to print beside the spine word.
 
-    candidates: list of words that fit within the 45-char limit
-    mode: WING_MODE setting
+    Two modes, where there were five. MINIMAL and RANDOM were guesses at
+    Cage's sparseness and at the chance in his method, and both are superseded
+    by measuring him. MAX was SHOW_ALL without the brackets, and INTERACTIVE
+    was a stub that behaved as MAX.
 
-    Returns: list of selected words or formatted string for SHOW_ALL
+    CAGE follows what he did. One span in six gets anything at all, decided
+    afresh each time; the count is a two-component draw, mostly one or two
+    words; and the pick leans toward the end of the span, the words just
+    before the next spine word. See model.py for how each was fitted.
+
+    SHOW_ALL prints the whole admissible set in brackets. It answers a
+    different question, what the rule allowed, and is a diagnostic rather than
+    a poem.
     """
     if not candidates:
         return []
 
     if mode == "SHOW_ALL":
-        # Show all candidates in brackets with pipe separators
         return f"[{' | '.join(candidates)}]"
 
-    elif mode == "MAX":
-        # Include all words
-        return candidates
+    if mode != "CAGE":
+        raise ValueError(f"WING_MODE must be 'CAGE' or 'SHOW_ALL', not {mode!r}")
 
-    elif mode == "RANDOM":
-        # Random selection
-        min_count, max_count = RANDOM_WORD_COUNT
-        count = random.randint(min_count, min(max_count, len(candidates)))
-        return random.sample(candidates, count)
+    # Imported here, not at the top: cage.py imports this module, so a
+    # module-level import of model would close a cycle.
+    import model
 
-    elif mode == "MINIMAL":
-        # Take only 1-2 content words, prefer longer ones
-        stopwords = {'the', 'a', 'an', 'to', 'of', 'in', 'on', 'at', 'for', 'and', 'or', 'with', 'by'}
-        content_words = [w for w in candidates if w.lower() not in stopwords]
+    rng = random if rng is None else rng
+    if rng.random() >= model.P_DECORATE:
+        return []
+    rate = model.WING_BRIEF if rng.random() < model.P_WING_BRIEF else model.WING_LONG
+    wanted = 1
+    while wanted < len(candidates) and rng.random() >= rate:
+        wanted += 1
+    # Weighted toward the end of the span: he favours the words that will sit
+    # immediately before the next spine word.
+    weights = [1 + 2 * (i / max(1, len(candidates) - 1)) for i in range(len(candidates))]
+    chosen, pool, pool_w = [], list(candidates), list(weights)
+    for _ in range(min(wanted, len(pool))):
+        total = sum(pool_w)
+        mark, running = rng.random() * total, 0.0
+        for i, w in enumerate(pool_w):
+            running += w
+            if running >= mark:
+                chosen.append((candidates.index(pool[i]), pool.pop(i)))
+                pool_w.pop(i)
+                break
+    return [word for _, word in sorted(chosen)]
 
-        if content_words:
-            # Take up to 2 longest content words
-            sorted_words = sorted(content_words, key=lambda x: len(x), reverse=True)
-            return sorted_words[:min(2, len(sorted_words))]
-        else:
-            # Fallback to first word if no content words
-            return [candidates[0]] if candidates else []
 
-    elif mode == "INTERACTIVE":
-        # Placeholder - for now, return MAX behavior. The prompt goes to
-        # stderr because stdout carries the poem.
-        print(f"Available wing words: {candidates}", file=sys.stderr)
-        # TODO: Implement user selection
-        return candidates
+def _take_this_one(rng):
+    """Does he take this candidate, or read on?
 
-    else:
-        # Default to MAX
-        return candidates
+    Measured from his own text: how selective he is varies, and it is drawn
+    afresh at every candidate rather than held for a stretch. In SHOW_ALL the
+    draw is skipped, because that mode answers what the rule allowed.
+    """
+    if WING_MODE != "CAGE":
+        return True
+    import model
 
-def generate_mesostic(spine_out=None):
+    rate = model.READING if rng.random() < model.P_READING else model.CHOOSING
+    return rng.random() < rate
+
+
+def generate_mesostic(spine_out=None, seed=0):
     """Walk the source text once, spelling the spine word down the page.
 
     Pass a list as `spine_out` to receive the (letter, word) pairs that were
     chosen, which is what a comparison against Cage's own text needs.
     """
+    rng = random.Random(seed)
     syllable_index = {}  # {letter: [used_syllables]}
     blocked = {}  # {letter: [syllables rejected because already indexed]}
     result_lines = []  # Each element is a complete line
@@ -176,7 +194,7 @@ def generate_mesostic(spine_out=None):
                     continue  # Continue collecting right wing
             # Either hit a forbidden word or reached char limit - finish right wing
             # Apply wing mode selection
-            selected_right = select_wing_words(right_wing_candidates, WING_MODE)
+            selected_right = select_wing_words(right_wing_candidates, WING_MODE, rng)
 
             # Add selected right wing to line segments
             if isinstance(selected_right, str):  # SHOW_ALL returns a string
@@ -204,7 +222,8 @@ def generate_mesostic(spine_out=None):
         # STATE 2: Word contains current target letter - this is a spine word
         if current_letter in word.upper():
             syllable = extract_syllable_with_letter(word, current_letter)
-            if syllable not in syllable_index.get(current_letter, []):
+            if syllable not in syllable_index.get(current_letter, []) \
+                    and _take_this_one(rng):
                 # Found spine word!
                 spine_word = capitalize_letter(word, current_letter)
 
@@ -225,7 +244,7 @@ def generate_mesostic(spine_out=None):
                 )
 
                 # Apply wing mode selection to consecutive left wing
-                selected_left = select_wing_words(left_wing_consecutive, WING_MODE)
+                selected_left = select_wing_words(left_wing_consecutive, WING_MODE, rng)
 
                 # Add left wing + spine word to segments
                 if isinstance(selected_left, str):  # SHOW_ALL returns a string
@@ -271,7 +290,7 @@ def generate_mesostic(spine_out=None):
 
     # Handle any remaining segments at end of text
     if collecting_right_wing:
-        selected_right = select_wing_words(right_wing_candidates, WING_MODE)
+        selected_right = select_wing_words(right_wing_candidates, WING_MODE, rng)
         if isinstance(selected_right, str):
             current_line_segments.append(selected_right)
         else:

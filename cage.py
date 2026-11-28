@@ -113,10 +113,17 @@ def compare(reference=None):
     reference = CANTO_I if reference is None else reference
     cage = spine_words(reference)
 
-    ours = []
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        mesostics.generate_mesostic(ours)
+    # The comparison asks whether his word is the first one admissible, which
+    # is a question about the rule and not about his chance draw. SHOW_ALL
+    # turns the draw off, so the walk takes the first candidate every time.
+    ours, mode = [], mesostics.WING_MODE
+    try:
+        mesostics.WING_MODE = "SHOW_ALL"
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            mesostics.generate_mesostic(ours)
+    finally:
+        mesostics.WING_MODE = mode
 
     rows = []
     for (letter, our_word), cage_word in zip(ours, cage):
