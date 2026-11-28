@@ -252,3 +252,31 @@ class TestAnalysis:
         rows, _ = cage_trace.walk(30)
         counts = collections.Counter(v for *_, v, _ in rows)
         assert (counts["DECLINED"], counts["SPENT"]) == (379, 26)
+
+    def test_he_leans_away_from_source_capitals(self):
+        import analysis
+        higher, lower, _, p = analysis.within_span_preference(
+            analysis.source_capitalised)
+        assert (higher, lower) == (26, 55)
+        assert p < 0.017, "below the Bonferroni threshold for three tests"
+
+    @pytest.mark.parametrize("name", ["vowel groups", "letters"])
+    def test_the_other_features_do_not_separate(self, name):
+        import analysis
+        *_, p = analysis.within_span_preference(analysis.PREFERENCE_TESTS[name])
+        assert p >= 0.017, f"{name} now separates; re-examine before claiming it"
+
+    def test_the_lean_is_a_bias_not_a_rule(self):
+        """He takes capitalised words often enough that no rule can forbid them."""
+        import analysis
+        taken = analysis.cage_spine_words()
+        caps = sum(analysis.source_capitalised(w) for w in taken)
+        assert (caps, len(taken)) == (83, 319)
+
+    def test_pooling_across_spans_would_mislead(self):
+        """Four declined per taken, so a pooled count is dominated by the bigger group."""
+        import trace as cage_trace
+        rows, _ = cage_trace.walk(200)
+        declined = sum(1 for *_, v, _ in rows if v == "DECLINED")
+        taken = sum(1 for *_, v, _ in rows if v == "SPINE")
+        assert declined > 2 * taken

@@ -36,6 +36,27 @@ Step 6 holds in 476 of 479 printed wing words. The exceptions:
 
 Two are the word `in`; the third is a word already printed once on its own line. Small, repeated, easy to skim past when you are doing this by hand.
 
+### What can be said about his choosing
+
+Two tendencies, measured over the 678 candidates he declined and the 319 he took.
+
+**He takes the first admissible word, or something near it.**
+
+| rank of his choice among the admissible | share | cumulative |
+| --------------------------------------- | ----- | ---------- |
+| first                                   | 52.9% | 52.9%      |
+| second                                  | 19.4% | 72.3%      |
+| third                                   | 12.6% | 84.8%      |
+| fourth or later                         | 15.2% | 100%       |
+
+Median rank 1, mean 3.2 with a long tail out to 175.
+
+**He leans away from words Pound capitalised.** Comparing the word he took against the candidates he declined in the same span, his choice is the less-capitalised one in 55 spans of 81, p=0.0017. Word length and syllable count do not separate them at all.
+
+Neither is a rule. 83 of his 319 choices are capitalised, `Pluto` among them, so nothing forbids them; and he leaves the first admissible word 47% of the time without breaking anything. `just analyse` re-derives both.
+
+A caution about how that was measured. Pooling every declined word against every taken word puts the capitalisation gap at 77% against 23%, which looks decisive and is an artifact: there are four declined words for every one taken, so the larger group dominates any pooled count whatever the truth. Holding the span fixed brings it to 68 against 32.
+
 ### What is not yet stated, and why
 
 Which admissible word he picked, and which admissible wing words he printed.

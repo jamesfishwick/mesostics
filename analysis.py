@@ -9,6 +9,7 @@ all 198 of his lines. The Canto I measurements work without it.
 """
 
 import itertools
+import math
 import re
 
 import cage
@@ -326,6 +327,78 @@ def disqualify(name, rows=None):
     return (rejected, total), examples
 
 
+def binomial_p(successes, trials):
+    """Two-sided exact test against a coin. No scipy needed for one formula."""
+    if not trials:
+        return 1.0
+    tail = sum(math.comb(trials, i)
+               for i in range(min(successes, trials - successes) + 1)) / 2 ** trials
+    return min(1.0, 2 * tail)
+
+
+def within_span_preference(feature, limit_lines=200):
+    """Compare the word Cage took against the candidates he declined beside it.
+
+    Comparing all taken words to all declined words is the wrong test: there
+    are four declined for every one taken, so the larger group dominates any
+    pooled count whatever the truth. Holding the span fixed removes that.
+
+    Returns (taken_higher, taken_lower, ties, p).
+    """
+    import trace as cage_trace
+
+    rows, _ = cage_trace.walk(limit_lines)
+    spans, current = [], []
+    for _, _, word, verdict, _ in rows:
+        if verdict == cage_trace.DECLINED:
+            current.append(word)
+        elif verdict == cage_trace.SPINE_MARK:
+            if current:
+                spans.append((current, word))
+            current = []
+        elif verdict == cage_trace.MISSING:
+            current = []
+
+    higher = lower = ties = 0
+    for declined, taken in spans:
+        peers = sum(feature(d) for d in declined) / len(declined)
+        if feature(taken) > peers:
+            higher += 1
+        elif feature(taken) < peers:
+            lower += 1
+        else:
+            ties += 1
+    return higher, lower, ties, binomial_p(lower, higher + lower)
+
+
+def source_capitalised(word):
+    letters = re.sub(r"[^A-Za-z]", "", word)
+    return int(bool(letters) and letters[0].isupper())
+
+
+def vowel_groups(word):
+    return len(re.findall(r"[aeiouy]+", word.lower())) or 1
+
+
+def word_length(word):
+    return len(re.sub(r"[^A-Za-z]", "", word))
+
+
+PREFERENCE_TESTS = {
+    "capitalised in source": source_capitalised,
+    "vowel groups": vowel_groups,
+    "letters": word_length,
+}
+
+
+def cage_spine_words(limit_lines=200):
+    """The source words Cage used to present a letter, as the source spells them."""
+    import trace as cage_trace
+
+    rows, _ = cage_trace.walk(limit_lines)
+    return [w for _, _, w, v, _ in rows if v == cage_trace.SPINE_MARK]
+
+
 def report():
     print("CAGE'S STATED RULE, against his own wings")
     try:
@@ -380,6 +453,19 @@ def report():
         print("\nDOES HE TAKE THE FIRST ADMISSIBLE WORD? (Cantos I-XXX)")
         print(f"  {agreed} of {compared} choices  ({100 * agreed / compared:.0f}%)"
               f"   {unalignable} not alignable")
+
+    if cage.os.path.exists(PP3_152):
+        print("\nWHAT SEPARATES THE WORD HE TOOK FROM THE ONES HE DECLINED?")
+        print("  (compared within each span; three tests, so the threshold is 0.017)")
+        for name, feature in PREFERENCE_TESTS.items():
+            higher, lower, ties, p = within_span_preference(feature)
+            verdict = "a real tendency" if p < 0.017 else "not distinguishable"
+            print(f"  {name:<22} taken lower in {lower:3d} of {higher + lower:3d} spans"
+                  f"  p={p:.4f}  {verdict}  ({ties} ties)")
+        taken_caps = sum(source_capitalised(w) for w in cage_spine_words())
+        total = len(cage_spine_words())
+        print(f"  -> and yet {taken_caps} of his {total} choices are capitalised,"
+              f" so it is a bias and not a rule")
 
     print("\nFILTER COMBINATIONS, scored against Cage")
     for value, combo, picked in search()[:5]:
