@@ -59,8 +59,8 @@ Seven rules. Five are certain, two are fitted models.
 | 1 | Read the source once, forward, never returning             | page references climb 2 to 781 with 2 backward steps in ~190; `narrow` comes from page 4 in a line otherwise on page 11 | certain          |
 | 2 | Spell EZRAPOUND down the page, four letters then five      | 106 EZRA lines, 92 POUND                                                                                                | certain          |
 | 3 | A word may present two letters at once                     | once, in Pound's `Ritz-Carlton`, which carries Z and R                                                                  | certain          |
-| 4 | Never present a letter with a syllable already spent on it | 884 presentations, zero reuse                                                                                           | certain          |
-| 5 | Between two spine letters, print no word carrying either   | 476 of 479 printed wing words                                                                                           | certain, 3 slips |
+| 4 | Never present a letter with a syllable already spent on it | 884 presentations, zero reuse                                                                                           | certain, 1 slip  |
+| 5 | Between two spine letters, print no word carrying either   | 532 of 535 printed wing words                                                                                           | certain, 3 slips |
 | 6 | Recase, so the mark is the only capital                    | `And`→`and`, `Pluto`→`plUto`                                                                                            | certain          |
 | 7 | Of the words that could present a letter, take one         | see below                                                                                                               | **modelled**     |
 
@@ -102,7 +102,7 @@ Stated as a procedure, with every step backed by a measurement over his own text
 
 5. **Never present the same letter with the same word twice.** Across all 884 presentations, zero exceptions.
 
-6. **Between two consecutive spine letters, print no word containing either of them.** 476 of 479 printed wing words obey. ◆ _How many_ of the admissible words to print is his choice: between `bronZe` and `beaRing` the rule allows four and he printed two; after `Arms` it allowed one and he printed none.
+6. **Between two consecutive spine letters, print no word containing either of them.** 532 of 535 printed wing words obey. ◆ _How many_ of the admissible words to print is his choice: between `bronZe` and `beaRing` the rule allows four and he printed two; after `Arms` it allowed one and he printed none.
 
 7. **The prohibition governs the page, not the path.** He reads straight past prohibited words without printing them. Nine of the seventeen source spans between his first eighteen spine words contain a word carrying a forbidden letter, including the `Pallor` and `upon` he walked over to reach `sheeP`.
 
@@ -112,7 +112,7 @@ Steps 1, 2, 4, 5, 6 and 8 are mechanical and this implementation now follows all
 
 ### Three places he slipped
 
-Step 6 holds in 476 of 479 printed wing words. The exceptions:
+Step 6 holds in 532 of 535 printed wing words. The exceptions:
 
 | word       | carries | line                                                      |
 | ---------- | ------- | --------------------------------------------------------- |

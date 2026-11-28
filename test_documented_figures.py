@@ -85,6 +85,7 @@ class TestCageFigures:
         import analysis
         ok, bad, _ = analysis.audit_wings()
         assert_claimed(f"{ok} of {ok + bad}", "wing words obeying his rule", "FINDINGS.md")
+        assert bad == 3, "three slips; if this moves, re-read the lines"
 
     def test_presentation_count(self):
         import cage

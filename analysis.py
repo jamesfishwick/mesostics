@@ -83,7 +83,7 @@ def audit_wings(rows=None):
     "I did not permit the appearance of either letter between two of the name."
     Returns (obeying, violating, examples).
     """
-    rows = cage.load_reference() if rows is None else rows
+    rows = cage.load_structure() if rows is None else rows
     ok, violations = 0, []
     for _, line in rows:
         words = line.split()
@@ -109,7 +109,7 @@ def audit_spine_letters(rows=None):
 
     A filter that is really a rule should never reject one.
     """
-    rows = cage.load_reference() if rows is None else rows
+    rows = cage.load_structure() if rows is None else rows
     testable = {n: f for n, f in FILTERS.items() if n not in SOURCE_ONLY_FILTERS}
     kept = dict.fromkeys(testable, 0)
     total = 0
@@ -411,7 +411,7 @@ def wing_lengths(rows=None):
     Secondary sources give a 45-character limit per wing, and this project
     took it as a rule. His own text never approaches it.
     """
-    rows = cage.load_reference() if rows is None else rows
+    rows = cage.load_structure() if rows is None else rows
     out = []
     for _, line in rows:
         tokens = line.split()

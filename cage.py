@@ -20,8 +20,26 @@ import warnings
 import mesostics
 
 SPINE = "EZRAPOUND"
-REFERENCE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                              "reference", "writing_through_the_cantos.tsv")
+_HERE = os.path.dirname(os.path.abspath(__file__))
+
+# Two readings of his eight pages, each better at a different thing.
+#
+# The PDF's own text layer gets words right and loses capitals, and a capital
+# is what marks the spine: one line arrives as "papEr ... braZilian ... s.A."
+# with the R gone. 198 lines survive that.
+#
+# Rendering the pages at 400 dpi and reading them with tesseract recovers the
+# capitals, 222 lines and 998 presentations, every margin reference legible
+# where only 141 of 198 were before. It pays for that with word errors of its
+# own, "pluto" as "piuto" and "lust" as "ust", which break an alignment
+# against Pound: 205 choices unplaceable against 4.
+#
+# So questions about his own text are asked of the OCR reading, and questions
+# that align him to Pound are asked of the text layer.
+TEXT_LAYER_PATH = os.path.join(_HERE, "reference", "by_text_layer.tsv")
+OCR_PATH = os.path.join(_HERE, "reference", "by_ocr.tsv")
+REFERENCE_PATH = os.path.join(_HERE, "reference",
+                              "writing_through_the_cantos.tsv")
 
 # Verified character for character against X: Writings '79-'82, p. 109. The
 # margin reference "3-4" is the page of The Cantos, which is Canto I.
@@ -106,6 +124,65 @@ def compare(reference=None):
     return rows
 
 
+def _render_and_read(pdf_path, first, last, dpi, scratch):
+    """Render each page to PNG and read it with tesseract. Returns text lines.
+
+    tesseract will not take a PNG on stdin, so the render goes to a file.
+    """
+    lines = []
+    for number in range(first, last + 1):
+        stem = os.path.join(scratch, f"pg{number}")
+        subprocess.run(["pdftoppm", "-r", str(dpi), "-gray", "-f", str(number),
+                        "-l", str(number), "-png", "-singlefile", pdf_path, stem],
+                       check=True, capture_output=True)
+        # tesseract exits non-zero on warnings while still producing output,
+        # so its status is not checked; an empty read is the real failure.
+        read = subprocess.run(["tesseract", stem + ".png", "-", "--psm", "6"],
+                              capture_output=True, check=False)
+        text = read.stdout.decode("utf-8", "replace")
+        if not text.strip():
+            raise RuntimeError(f"tesseract read nothing from page {number}: "
+                               f"{read.stderr.decode('utf-8', 'replace')[:200]}")
+        lines += text.split("\n")
+    return lines
+
+
+def extract_by_ocr(pdf_path, first=115, last=123, dpi=400):
+    """Re-read his pages from the page images rather than the PDF's text layer.
+
+    The embedded layer drops capitals, and a capital is the whole point: it is
+    what marks the spine. One line comes through as "papEr ... braZilian ...
+    s.A." with the R gone, which spells EZA, so the line is unusable and the
+    EZRA/POUND alternation appears to break. Rendered at 400 dpi and read
+    again it is "secuRities", and the line is fine.
+
+    Recovers 222 clean lines against 198 from the text layer, and brings the
+    segment counts to 112 EZRA and 110 POUND from 106 and 92.
+    """
+    # The renders go beside the extracted text rather than into a fresh
+    # temporary directory: tesseract could not open files there under the
+    # sandbox this runs in, reporting the image as missing while it existed.
+    scratch = os.path.join(os.path.dirname(REFERENCE_PATH), "pages")
+    os.makedirs(scratch, exist_ok=True)
+    rows, page = [], "?"
+    pages = _render_and_read(pdf_path, first, last, dpi, scratch)
+    for raw in pages:
+        line = re.sub(r"^[|\s]+", "", raw.rstrip())
+        reference = re.search(r"\s+(\d{1,3}(?:-\d{1,3})?)\s*$", line)
+        if reference:
+            page = reference.group(1)
+            line = line[:reference.start()]
+        line = " ".join(line.split())
+        if is_spine_line(line):
+            rows.append((page, line))
+
+    os.makedirs(os.path.dirname(REFERENCE_PATH), exist_ok=True)
+    with open(REFERENCE_PATH, "w", encoding="utf-8") as out:
+        for page, line in rows:
+            out.write(f"{page}\t{line}\n")
+    return rows
+
+
 def extract_from_pdf(pdf_path):
     """Rebuild the full 363-line reference from a copy of the book.
 
@@ -156,12 +233,35 @@ def extract_from_pdf(pdf_path):
     return rows
 
 
-def load_reference():
-    """The full reference if it has been extracted, else the Canto I pair."""
-    if not os.path.exists(REFERENCE_PATH):
+def _load(path):
+    if not os.path.exists(path):
         return CANTO_I
-    with open(REFERENCE_PATH, encoding="utf-8") as source:
+    with open(path, encoding="utf-8") as source:
         return [tuple(line.split("\t", 1)) for line in source.read().splitlines()]
+
+
+def load_reference():
+    """His lines as the PDF's text layer gives them: good words, lost capitals.
+
+    This is the one to align against Pound, because a wrong word desyncs a
+    forward-only walk and the OCR reading has more of them.
+    """
+    for path in (TEXT_LAYER_PATH, REFERENCE_PATH):
+        if os.path.exists(path):
+            return _load(path)
+    return CANTO_I
+
+
+def load_structure():
+    """His lines as a 400 dpi re-read gives them: every capital, some bad words.
+
+    This is the one for questions about his own text, where the capitals are
+    the evidence and no alignment to Pound is involved.
+    """
+    for path in (OCR_PATH, REFERENCE_PATH):
+        if os.path.exists(path):
+            return _load(path)
+    return CANTO_I
 
 
 def report():

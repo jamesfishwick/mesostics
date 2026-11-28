@@ -72,8 +72,10 @@ class TestReference:
         assert marked == cage.SPINE
 
     def test_load_reference_falls_back_without_an_extract(self, monkeypatch):
-        monkeypatch.setattr(cage, "REFERENCE_PATH", "/nonexistent/cantos.tsv")
+        for name in ("TEXT_LAYER_PATH", "OCR_PATH", "REFERENCE_PATH"):
+            monkeypatch.setattr(cage, name, "/nonexistent/cantos.tsv")
         assert cage.load_reference() == cage.CANTO_I
+        assert cage.load_structure() == cage.CANTO_I
 
 
 class TestAnalysis:
@@ -298,18 +300,22 @@ class TestAnalysis:
         """Secondary sources give it as a rule. His text never approaches it."""
         import analysis
         lengths = analysis.wing_lengths()
-        assert len(lengths) == 435
-        assert max(lengths) == 27, "if this ever passes 45 the limit may be real"
+        assert len(lengths) == 471
+        assert max(lengths) == 28, "if this ever passes 45 the limit may be real"
         assert sorted(lengths)[len(lengths) // 2] == 4
 
-    def test_no_word_presents_the_same_letter_twice(self):
-        """Rule 4, over every one of his presentations rather than a sample."""
+    def test_rule_four_has_exactly_one_exception(self):
+        """Read at 400 dpi, 998 presentations hold one repeat: Pit for P, twice.
+
+        The text layer missed it by losing 24 lines. One slip in 998 sits
+        alongside the three in his wing prohibition.
+        """
         import collections
         pairs = [(letter, cage.bare(word))
-                 for _, line in cage.load_reference()
+                 for _, line in cage.load_structure()
                  for letter, word in cage.presentations(line)]
         repeats = {k: v for k, v in collections.Counter(pairs).items() if v > 1}
-        assert repeats == {}
+        assert repeats == {("P", "pit"): 2}
 
     def test_a_word_may_present_different_letters(self):
         """Rule 4 is per letter, so the same word elsewhere is allowed."""
