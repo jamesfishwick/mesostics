@@ -65,7 +65,7 @@ def test_the_residue_is_small_and_named():
 def test_his_rate_is_what_the_model_uses():
     ranks = model.cage_ranks()
     first = collections.Counter(ranks)[1] / len(ranks)
-    assert abs(first - 0.536) < 0.01
+    assert abs(first - 0.540) < 0.01
 
 
 def test_a_lost_word_does_not_manufacture_a_deep_reach():

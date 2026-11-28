@@ -148,7 +148,7 @@ class TestAnalysis:
     def test_he_takes_the_first_admissible_word_just_over_half_the_time(self):
         import analysis
         compared, agreed, unalignable = analysis.agreement()
-        assert (compared, agreed, unalignable) == (307, 163, 8)
+        assert (compared, agreed, unalignable) == (315, 168, 4)
 
     @pytest.mark.parametrize("lines", [2, 4, 16, 30])
     def test_the_trace_accounts_for_every_word(self, lines):
@@ -168,7 +168,7 @@ class TestAnalysis:
         import trace as cage_trace
         rows, _ = cage_trace.walk(30)
         tied = sum(1 for *_, v, _ in rows if v == "TIED")
-        assert (len(rows), tied) == (11289, 79)
+        assert (len(rows), tied) == (11287, 79)
         assert 100 * (len(rows) - tied) / len(rows) > 99
 
     def test_a_tie_is_provenance_not_an_open_decision(self):
@@ -257,7 +257,7 @@ class TestAnalysis:
         import analysis
         higher, lower, _, p = analysis.within_span_preference(
             analysis.source_capitalised)
-        assert (higher, lower) == (26, 55)
+        assert (higher, lower) == (24, 56)
         assert p < 0.017, "below the Bonferroni threshold for three tests"
 
     @pytest.mark.parametrize("name", ["vowel groups", "letters"])
@@ -271,7 +271,7 @@ class TestAnalysis:
         import analysis
         taken = analysis.cage_spine_words()
         caps = sum(analysis.source_capitalised(w) for w in taken)
-        assert (caps, len(taken)) == (83, 319)
+        assert (caps, len(taken)) == (84, 323)
 
     def test_pooling_across_spans_would_mislead(self):
         """Four declined per taken, so a pooled count is dominated by the bigger group."""

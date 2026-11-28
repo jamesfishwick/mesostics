@@ -16,6 +16,10 @@ Cross-checking the two scans against each other finds 251 likely errors in their
 
 Two real defects were found and fixed: the drop capital at each canto opening had lost its small-capital tail, so `A ND then went down` had become `A then went down`, and the corpus ran nineteen words past `Explicit canto` into scan noise and a section divider. Neither moved a single published figure.
 
+Four of the words that could not be placed have since been resolved by reading Cage's printed line beside Pound's, which is what a second text is actually good for. Three were our scan of the Cantos: `concubuisse` had come through as `concuhuisse`, Pound's Italian `di cui` as `di cut`, and `petal'd` as `petaPd`, the apostrophe read as a P. The fourth was this project's reading of Cage's own page, which dropped a letter from `Rotterdam`. All four are corrected, and unplaceable words fall from 8 to 2.
+
+The two that remain are `sEa-jauZionda` and `uP-Other`, both single hyphenated tokens in his text that our Cantos scan renders differently. They are printed in his book exactly as quoted here, so the mismatch is real and not an extraction slip.
+
 **So corpus quality is not a limit on anything here.** Six of Cage's words remain unfindable, and the damage in those is mine rather than the Cantos scan's: it is in the text extracted from the PDF of _X: Writings '79-'82_, where `rotterdam` came out as `rotterdm`. Cage read a printed book. Both scans in this project are mine, one of his pages and one of Pound's, and a word lost in the first cannot be recovered from the second.
 
 ## The rule set
@@ -220,7 +224,7 @@ The word-level result above, that Cage never reused a word to present a letter, 
 
 198 mesostic lines, 106 spelling EZRA and 92 spelling POUND, carrying 884 spine presentations between them. Each pair of lines carries a margin reference to the page of _The Cantos_ it was drawn from, and those references run from 3 to 782.
 
-`corpus/cantos_pp3-152.txt` carries printed pages 3 to 152 of the New Directions edition, Cantos I to XXX, 28,387 words. Those cantos were published in 1925 and 1930 and are out of US copyright. They cover 307 of Cage's 884 spine choices, up from the 18 that Canto I alone could reach. The rest of the evidence is structural: what his choices have in common, not what we could have chosen instead.
+`corpus/cantos_pp3-152.txt` carries printed pages 3 to 152 of the New Directions edition, Cantos I to XXX, 28,365 words. Those cantos were published in 1925 and 1930 and are out of US copyright. They cover 315 of Cage's 884 spine choices, up from the 18 that Canto I alone could reach. The rest of the evidence is structural: what his choices have in common, not what we could have chosen instead.
 
 **He read the source continuously.** The margin reference marks where a pair _ends_, not a window he jumped to. His third line opens `thE narrow glaZes the uptuRned nipple As`, and `narrow` is not on page 11 at all: it is Canto I's "Unsheathed the narrow sword", back on page 4. The rest of that line is page 11. So he carried straight on from where the previous pair stopped.
 
@@ -291,11 +295,11 @@ Over the full Cantos I-XXX corpus, with the cursor anchored to his position at e
 
 |                                              |               |
 | -------------------------------------------- | ------------- |
-| choices compared                             | **307**       |
-| where we would pick his word                 | **163 (53%)** |
+| choices compared                             | **315**       |
+| where we would pick his word                 | **168 (53%)** |
 | not alignable (lost in one of the two scans) | 8             |
 
-The eighteen-letter sample said 61%. At 307 it is 53%, so the small sample was mildly optimistic but not misleading. He takes the first admissible word slightly more often than not, and the implementation is far closer to him than a naive end-to-end score suggests.
+The eighteen-letter sample said 61%. At 315 it is 53%, so the small sample was mildly optimistic but not misleading. He takes the first admissible word slightly more often than not, and the implementation is far closer to him than a naive end-to-end score suggests.
 
 ### The seven deviations
 

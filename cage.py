@@ -58,9 +58,18 @@ def spine_words(lines):
             if any(char.isupper() for char in word)]
 
 
+# Words this project's own reading of Cage's pages gets wrong. Each was
+# checked against his printed line and against Pound's text, which supplies
+# the spelling. These are errors in extracting his book, not his.
+EXTRACTION_ERRORS = {
+    "rotterdm": "rotterdam",   # the a is in his line and in Pound's "Rotterdam"
+}
+
+
 def bare(word):
     """A word reduced to letters, so "arms," and "Arms" compare equal."""
-    return re.sub(r"[^a-z]", "", word.lower())
+    stripped = re.sub(r"[^a-z]", "", word.lower())
+    return EXTRACTION_ERRORS.get(stripped, stripped)
 
 
 def compare(reference=None):
