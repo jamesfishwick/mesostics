@@ -28,9 +28,20 @@ source_text = canto_1.split()
 target_name = "EZRAPOUND"
 
 # Configuration
-WING_CHAR_LIMIT = 45  # Maximum characters on each side of spine word
+# A cap on how much SHOW_ALL prints in one bracket, so the diagnostic stays
+# readable: a span can admit 757 words. It is not one of Cage's rules. The
+# README once cited 45 characters per wing from secondary sources and the
+# generator enforced it on every mode, but his own longest wing is 28
+# characters and his median is 4, so the limit never binds on him. CAGE mode
+# draws from the whole admissible span and ignores this.
+SHOW_ALL_CHAR_LIMIT = 200
 MESOSTIC_RULE = "100%"  # "100%", "50%", or "0%" - see prohibited_letters
 WING_MODE = "CAGE"  # "CAGE" for what he did, "SHOW_ALL" to see what the rule allowed
+
+def wing_char_limit():
+    """How much of a wing to keep. Unbounded for CAGE; capped for SHOW_ALL."""
+    return SHOW_ALL_CHAR_LIMIT if WING_MODE == "SHOW_ALL" else float("inf")
+
 
 def prohibited_letters(other_letter, current_letter):
     """Letters a wing word may not contain, at the configured strictness.
@@ -188,11 +199,11 @@ def generate_mesostic(spine_out=None, seed=0):
             forbidden = prohibited_letters(previous_letter, current_letter)
             if not letters_in_word & forbidden:
                 word_len = len(word) + 1  # +1 for space
-                if right_wing_chars + word_len <= WING_CHAR_LIMIT:
+                if right_wing_chars + word_len <= wing_char_limit():
                     right_wing_candidates.append(word)
                     right_wing_chars += word_len
                     continue  # Continue collecting right wing
-            # Either hit a forbidden word or reached char limit - finish right wing
+            # A forbidden word, or the display cap: finish the right wing
             # Apply wing mode selection
             selected_right = select_wing_words(right_wing_candidates, WING_MODE, rng)
 
@@ -240,7 +251,7 @@ def generate_mesostic(spine_out=None, seed=0):
                 left_wing_consecutive = extract_consecutive_left_wing(
                     left_wing_history,
                     exclude_letters,
-                    WING_CHAR_LIMIT
+                    wing_char_limit()
                 )
 
                 # Apply wing mode selection to consecutive left wing

@@ -30,12 +30,12 @@ The parser leaves all three joined. Splitting them sends the alignment hunting f
 
 ## A rule the project assumed and his text denies
 
-The README cites a 45-character limit per wing, taken from two secondary sources, and `mesostics.py` has enforced it since the first commit. Measured against his own 435 non-empty wings:
+The README cites a 45-character limit per wing, taken from two secondary sources, and `mesostics.py` enforced it on every mode from the first commit until this was measured. Against his own 471 non-empty wings:
 
 |               |                   |
 | ------------- | ----------------- |
 | median wing   | **4 characters**  |
-| longest wing  | **27 characters** |
+| longest wing  | **28 characters** |
 | wings over 45 | **0**             |
 
 The limit never binds. Whatever those sources describe, it is not a constraint Cage was working against in this piece: he is an order of magnitude sparser than it allows. Reading the limit as a rule gets his practice backwards, since the thing that needs explaining is why he prints so little, not what stopped him printing more.

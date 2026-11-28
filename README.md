@@ -53,7 +53,7 @@ Through analysis of Cage's output compared to source text, we've identified thes
 - [Virginia Silence mailing list discussion](https://lists.virginia.edu/sympa/arc/silence/2019-01/msg00024/mesostic_demo.pdf)
 - [Platonic Music Engine implementation](https://www.platonicmusicengine.com/mesostic.html)
 
-These sources specify the **45-character limit**: Maximum 45 characters of wing words on either side of each spine word.
+These sources specify a **45-character limit**: at most 45 characters of wing words either side of each spine word. His own text does not bear that out. Across his 471 non-empty wings the median is 4 characters and the longest is 28, so the limit never binds and is not a constraint he was working against. See [FINDINGS.md](FINDINGS.md).
 
 ## Installation
 
@@ -89,7 +89,7 @@ uv run pytest
 Edit the configuration variables in `mesostics.py`:
 
 ```python
-WING_CHAR_LIMIT = 45       # Character limit per wing
+SHOW_ALL_CHAR_LIMIT = 200  # Display cap for the diagnostic mode, not a rule
 MESOSTIC_RULE = "100%"     # Between-letter strictness
 WING_MODE = "SHOW_ALL"     # Wing word selection mode
 ```
@@ -98,11 +98,11 @@ WING_MODE = "SHOW_ALL"     # Wing word selection mode
 
 `MESOSTIC_RULE` sets which letters a wing word may not contain.
 
-| Setting | Prohibited between spine letters                        | Canto I output |
-| ------- | ------------------------------------------------------- | -------------- |
-| `100%`  | both the previous spine letter and the one being sought | 209 characters |
-| `50%`   | only the letter being sought                            | 457 characters |
-| `0%`    | neither, so only the spine itself constrains the text   | 796 characters |
+| Setting | Prohibited between spine letters                        | Canto I output  |
+| ------- | ------------------------------------------------------- | --------------- |
+| `100%`  | both the previous spine letter and the one being sought | 209 characters  |
+| `50%`   | only the letter being sought                            | 1077 characters |
+| `0%`    | neither, so only the spine itself constrains the text   | 3113 characters |
 
 `100%` is the rule Cage states and the default. The looser settings are this implementation's reading of a knob the source material does not define, and they exist to show what the prohibition is doing. Any other value raises.
 
@@ -140,7 +140,7 @@ The script generates mesostic lines:
 
 - Implements proper between-letter prohibition
 - Tracks syllable usage to prevent repetition
-- Enforces 45-character wing limits per Cage's method
+- Caps the diagnostic view at 200 characters so one bracket stays readable, a display choice rather than one of his rules
 
 ### Syllable extraction
 
